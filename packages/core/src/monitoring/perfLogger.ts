@@ -51,13 +51,13 @@ export class PerfLogger implements Logger {
         };
     }
 
-    private createPerfEvent(domain: PerfDomain, ipc: boolean): PerfEvent {
+    private createPerfEvent(domain: PerfDomain, ipc?: boolean): PerfEvent {
         return {
             id: this.getNextId(),
             date: new Date(),
             status: PerfStatus.Pending,
             domain,
-            ipc
+            ipc: ipc ?? true
         };
     }
 
