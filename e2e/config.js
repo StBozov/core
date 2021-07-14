@@ -1,38 +1,52 @@
+/*
+    Example test group:
+        {
+            groupName: 'Example',
+            timesToRun: 1,
+            processes: ['exampleServer']
+        }
+*/
+
 const basePolling = require('./ready-conditions/base-polling');
 
 module.exports = {
+    libPaths: [
+        'packages/web/dist/web.umd.js',
+        'packages/workspaces-api/dist/workspaces.umd.js'
+    ],
     run: [
         {
-            groupName: "contexts"
+            groupName: 'notifications'
         },
         {
-            groupName: "interop"
+            groupName: 'system'
         },
         {
-            groupName: "channels"
+            groupName: 'appManager'
         },
         {
-            groupName: "app-manager",
-            processes: ["remoteSource"]
+            groupName: 'channels'
+        },
+        {
+            groupName: 'contexts'
+        },
+        {
+            groupName: 'intents'
+        },
+        {
+            groupName: 'interop'
+        },
+        {
+            groupName: 'windows'
+        },
+        {
+            groupName: 'workspaces'
         }
     ],
     processes: [
         {
-            name: "exampleServer",
-            path: "./testServer/exampleServer.js",
-            args: ['first', 'second', 'third'],
-            readyCondition: basePolling({
-                hostname: 'localhost',
-                port: 7777,
-                path: '/',
-                method: 'GET',
-                pollingInterval: 100,
-                pollingTimeout: 30 * 1000
-            })
-        },
-        {
-            name: "remoteSource",
-            path: "./remote-source/index.js",
+            name: 'remoteSource',
+            path: './remote-source/index.js',
             readyCondition: basePolling({
                 hostname: 'localhost',
                 port: 9998,

@@ -2,11 +2,14 @@ import GoldenLayout from "@glue42/golden-layout";
 import { Workspace, FrameLayoutConfig, WorkspaceItem, WorkspaceLayout, AnyItem, SavedConfigWithData, WorkspaceOptionsWithLayoutName, SaveWorkspaceConfig } from "./types/internal";
 import storage from "./storage";
 import scReader from "./config/startupReader";
-import { LayoutStateResolver } from "./layout/stateResolver";
+import { LayoutStateResolver } from "./state/resolver";
 import { Glue42Web } from "@glue42/web";
 import { getWorkspaceContextName } from "./utils";
 import { WorkspacesConfigurationFactory } from "./config/factory";
 import { ConfigConverter } from "./config/converter";
+import { ConstraintsValidator } from "./config/constraintsValidator";
+
+declare const window: Window & { glue42core: { workspacesFrameCache?: boolean } };
 
 export class LayoutsManager {
     private _initialWorkspaceConfig: GoldenLayout.Config;
@@ -17,7 +20,8 @@ export class LayoutsManager {
         private readonly resolver: LayoutStateResolver,
         private readonly _glue: Glue42Web.API,
         private readonly _configFactory: WorkspacesConfigurationFactory,
-        private readonly _configConverter: ConfigConverter) { }
+        private readonly _configConverter: ConfigConverter,
+        private readonly _constraintsValidator: ConstraintsValidator) { }
 
     public async getInitialConfig(): Promise<FrameLayoutConfig> {
         // Preset initial config
@@ -73,10 +77,14 @@ export class LayoutsManager {
     }
 
     public getLastSession() {
+        const workspacesFrameCache = window.glue42core?.workspacesFrameCache ?? true;
+        if (!workspacesFrameCache) {
+            return;
+        }
         const workspacesFrame = storage.get(storage.LAST_SESSION_KEY) || [];
         const rendererFriendlyFrameConfig = workspacesFrame.map((wc: WorkspaceItem) => {
             this.addWorkspaceIds(wc);
-            this.addWindowIds(wc);
+            // this.addWindowIds(wc);
             return this._configConverter.convertToRendererConfig(wc);
         });
         return rendererFriendlyFrameConfig;
@@ -95,42 +103,45 @@ export class LayoutsManager {
     public async getWorkspaceByName(name: string): Promise<SavedConfigWithData> {
         const savedWorkspaceLayout = await this._glue.layouts.get(name, this._layoutsType);
         const savedWorkspace: WorkspaceItem = savedWorkspaceLayout.components[0].state as WorkspaceItem;
+        this._constraintsValidator.fixWorkspace(savedWorkspace);
         const rendererFriendlyConfig = this._configConverter.convertToRendererConfig(savedWorkspace);
 
         this.addWorkspaceIds(rendererFriendlyConfig);
-        this.addWindowIds(rendererFriendlyConfig);
 
         return {
             config: rendererFriendlyConfig as GoldenLayout.Config,
             layoutData: {
                 metadata: savedWorkspaceLayout.metadata,
                 name,
-                context: (savedWorkspace as WorkspaceItem & { context: any }).context
+                context: (savedWorkspace as WorkspaceItem & { context: object }).context ?? {}
             }
         };
     }
 
-    public async delete(name: string) {
+    public async delete(name: string): Promise<void> {
         await this._glue.layouts.remove(this._layoutsType, name);
     }
 
     public async save(options: SaveWorkspaceConfig): Promise<WorkspaceLayout> {
-        const { workspace, title, name, saveContext } = options;
-        if (!workspace.layout) {
+        const { workspace, name, saveContext } = options;
+        if (!workspace.layout && !workspace.hibernateConfig) {
             throw new Error("An empty layout cannot be saved");
         }
-        workspace.layout.config.workspacesOptions.name = name;
+
+        (workspace.layout?.config || workspace.hibernateConfig).workspacesOptions.name = name;
 
         const workspaceConfig = await this.saveWorkspaceCore(workspace);
 
-        if (title) {
-            workspaceConfig.config.title = title;
+        // Its superfluous to add the title to the layout since its never used
+        if (workspaceConfig.config.title) {
+            delete workspaceConfig.config.title;
         }
-        let workspaceContext = {};
+
+        let workspaceContext = undefined;
 
         if (saveContext) {
             try {
-                workspaceContext = await this.getWorkspaceContext(workspace.id) || {}
+                workspaceContext = await this.getWorkspaceContext(workspace.id);
             } catch (error) {
                 // can throw an exception when reloading
             }
@@ -145,12 +156,12 @@ export class LayoutsManager {
                 state: {
                     children: workspaceConfig.children,
                     config: workspaceConfig.config,
-                    context: workspaceContext
+                    context: workspaceContext ?? {}
                 }
             }]
         };
 
-        await this._glue.layouts.import([layoutToImport as Glue42Web.Layouts.Layout]);
+        await this._glue.layouts.import([layoutToImport as Glue42Web.Layouts.Layout], "merge");
 
         return layoutToImport;
     }
@@ -161,6 +172,11 @@ export class LayoutsManager {
         }
         workspace.layout.config.workspacesOptions.name = name;
         const workspaceConfig = await this.saveWorkspaceCore(workspace);
+
+        // Its superfluous to add the title to the layout since its never used
+        if (workspaceConfig.config.title) {
+            delete workspaceConfig.config.title;
+        }
 
         return {
             name,
@@ -177,6 +193,10 @@ export class LayoutsManager {
     }
 
     public async saveWorkspacesFrame(workspaces: Workspace[]) {
+        const workspacesFrameCache = window.glue42core?.workspacesFrameCache ?? true;
+        if (!workspacesFrameCache) {
+            return;
+        }
         const configPromises = workspaces.map((w) => {
             return this.saveWorkspaceCoreSync(w);
         });
@@ -189,10 +209,14 @@ export class LayoutsManager {
     }
 
     private async saveWorkspaceCore(workspace: Workspace): Promise<WorkspaceItem> {
-        if (!workspace.layout) {
+        if (!workspace.layout && !workspace.hibernateConfig) {
             return undefined;
         }
         const workspaceConfig = this.resolver.getWorkspaceConfig(workspace.id);
+        if ((workspaceConfig.workspacesOptions as any).layoutName) {
+            delete (workspaceConfig.workspacesOptions as any).layoutName;
+        }
+
         this.removeWorkspaceIds(workspaceConfig);
         await this.applyWindowLayoutState(workspaceConfig);
 
@@ -208,7 +232,7 @@ export class LayoutsManager {
     }
 
     private saveWorkspaceCoreSync(workspace: Workspace): WorkspaceItem {
-        if (!workspace.layout) {
+        if (!workspace.layout && !workspace.hibernateConfig) {
             return undefined;
         }
         const workspaceConfig = this.resolver.getWorkspaceConfig(workspace.id);

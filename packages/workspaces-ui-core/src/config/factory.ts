@@ -1,10 +1,10 @@
 import GoldenLayout from "@glue42/golden-layout";
 import shortId from "shortid";
-import { FrameLayoutConfig, APIWIndowSettings, WorkspaceOptionsWithTitle } from "../types/internal";
+import { FrameLayoutConfig, APIWIndowSettings, WorkspaceOptionsWithTitle, GDWindowOptions } from "../types/internal";
 import { TitleGenerator } from "./titleGenerator";
 import { idAsString } from "../utils";
-import store from "../store";
-import { EmptyVisibleWindowName } from "../constants";
+import store from "../state/store";
+import { EmptyVisibleWindowName } from "../utils/constants";
 import { Glue42Web } from "@glue42/web";
 
 declare const window: { glue: Glue42Web.API };
@@ -35,8 +35,16 @@ export class WorkspacesConfigurationFactory {
         };
     }
 
-    public createGDWindowConfig(args: { windowId: string; id?: string; appName?: string; url?: string; title?: string; context?: object }): GoldenLayout.ComponentConfig {
+    public createGDWindowConfig(args: GDWindowOptions): GoldenLayout.ComponentConfig {
         const baseConfiguration = this.createWindowConfigurationCore(args.id);
+        const workspacesConfig = {
+            allowExtract: args.allowExtract,
+            showCloseButton: args.showCloseButton,
+            minWidth: args.minWidth,
+            minHeight: args.minHeight,
+            maxWidth: args.maxWidth,
+            maxHeight: args.maxHeight
+        } as GoldenLayout.BaseItemConfig["workspacesConfig"];
         return {
             ...baseConfiguration,
             ...{
@@ -49,7 +57,8 @@ export class WorkspacesConfigurationFactory {
                     url: args.url,
                     title: args.title,
                     context: args.context
-                }
+                },
+                workspacesConfig
             }
         };
     }
@@ -68,7 +77,15 @@ export class WorkspacesConfigurationFactory {
                 title: args.title,
                 workspaceId: args.workspaceId,
                 frameId: args.frameId,
-                positionIndex: args.positionIndex
+                positionIndex: args.positionIndex,
+                allowExtract: args.allowExtract,
+                showCloseButton: args.showCloseButton,
+                minWidth: args.minWidth,
+                maxWidth: args.maxWidth,
+                minHeight: args.minHeight,
+                maxHeight: args.maxHeight,
+                widthInPx: args.widthInPx,
+                heightInPx: args.heightInPx
             }
         };
     }

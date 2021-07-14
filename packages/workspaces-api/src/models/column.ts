@@ -1,5 +1,8 @@
 import { Base } from "./base/base";
 import { Glue42Workspaces } from "../../workspaces.d";
+import { columnLockConfigDecoder } from "../shared/decoders";
+import { ColumnLockConfig } from "../types/temp";
+import { number } from "decoder-validate";
 
 interface PrivateData {
     base: Base;
@@ -49,6 +52,37 @@ export class Column implements Glue42Workspaces.Column {
     public get workspace(): Glue42Workspaces.Workspace {
         return getBase(this).getMyWorkspace(this);
     }
+    public get allowDrop(): boolean {
+        return getBase(this).getAllowDrop(this);
+    }
+
+    public get minWidth(): number {
+        return getBase(this).getMinWidth(this);
+    }
+
+    public get minHeight(): number {
+        return getBase(this).getMinHeight(this);
+    }
+
+    public get maxWidth(): number {
+        return getBase(this).getMaxWidth(this);
+    }
+
+    public get maxHeight(): number {
+        return getBase(this).getMaxHeight(this);
+    }
+
+    public get width(): number {
+        return getBase(this).getWidthInPx(this);
+    }
+
+    public get height(): number {
+        return getBase(this).getHeightInPx(this);
+    }
+
+    public get isPinned(): boolean {
+        return getBase(this).getIsPinned(this);
+    }
 
     public addWindow(definition: Glue42Workspaces.WorkspaceWindowDefinition): Promise<Glue42Workspaces.WorkspaceWindow> {
         return getBase(this).addWindow(this, definition, "column");
@@ -89,4 +123,25 @@ export class Column implements Glue42Workspaces.Column {
         return getBase(this).close(this);
     }
 
+    public lock(config?: ColumnLockConfig | ((config: ColumnLockConfig) => ColumnLockConfig)): Promise<void> {
+        let lockConfigResult = undefined;
+
+        if (typeof config === "function") {
+            const currentLockConfig = {
+                allowDrop: this.allowDrop,
+            };
+
+            lockConfigResult = config(currentLockConfig);
+
+        } else {
+            lockConfigResult = config;
+        }
+        const verifiedConfig = lockConfigResult === undefined ? undefined : columnLockConfigDecoder.runWithException(lockConfigResult);
+        return getBase(this).lockContainer(this, verifiedConfig);
+    }
+
+    public async setWidth(width: number): Promise<void> {
+        number().where(n => n > 0, "The value should be positive").runWithException(width);
+        return getBase(this).setWidth(this, width);
+    }
 }

@@ -5,8 +5,8 @@ import App from './App';
 import reportWebVitals from './reportWebVitals';
 import { GlueProvider } from "@glue42/react-hooks";
 import GlueWorkspaces from "@glue42/workspaces-api";
-import Glue, { Glue42 } from "@glue42/desktop";
-import GlueWeb, { Glue42Web } from "@glue42/web";
+import Glue from "@glue42/desktop";
+import GlueWeb from "@glue42/web";
 
 import "@glue42/workspaces-ui-react/dist/styles/popups.css";
 import "@glue42/workspaces-ui-react/dist/styles/goldenlayout-base.css";
@@ -15,11 +15,19 @@ import "./index.css";
 
 ReactDOM.render(
   <React.StrictMode>
-    <GlueProvider glueFactory={(config: Glue42.Config | Glue42Web.Config | undefined) => {
-      return window.glue42gd ?
-        // The used glue config is required from the <Workspaces/> component to ensure that the default popups work correctly
-        Glue(Object.assign(config, { libraries: [GlueWorkspaces], appManager: "skipIcons" }) as Glue42.Config) :
-        GlueWeb(Object.assign(config, { application: "Workspaces", libraries: [GlueWorkspaces], appManager: true }) as Glue42Web.Config)
+    <GlueProvider settings={{
+      web: {
+        config: { libraries: [GlueWorkspaces] },
+        factory: (config) => {
+          return GlueWeb(config);
+        }
+      },
+      desktop: {
+        config: { libraries: [GlueWorkspaces], appManager: "skipIcons" },
+        factory: (config) => {
+          return Glue(config);
+        }
+      }
     }}>
       <App />
     </GlueProvider>

@@ -3,9 +3,10 @@ import { Glue42Workspaces } from "../../workspaces";
 import { AddItemResult, WorkspaceSnapshotResult, FrameSnapshotResult } from "./protocol";
 import { SubscriptionConfig, WorkspaceEventType, WorkspaceEventAction } from "./subscription";
 import { RefreshChildrenConfig } from "./privateData";
-import { Child } from "./builders";
+import { Child, ContainerLockConfig, SubParentTypes } from "./builders";
 import { GDWindow } from "./glue";
 import { UnsubscribeFunction } from "callback-registry";
+import { Constraints, WorkspaceLockConfig, WorkspaceWindowLockConfig } from "./temp";
 
 export interface WorkspacesController {
     checkIsInSwimlane(windowId: string): Promise<boolean>;
@@ -31,12 +32,13 @@ export interface WorkspacesController {
     updateWorkspaceContext(workspaceId: string, data: any): Promise<void>;
     subscribeWorkspaceContextUpdated(workspaceId: string, callback: (data: any) => void): Promise<UnsubscribeFunction>;
     saveLayout(config: Glue42Workspaces.WorkspaceLayoutSaveConfig): Promise<Glue42Workspaces.WorkspaceLayout>;
-    importLayout(layouts: Glue42Workspaces.WorkspaceLayout[]): Promise<void>;
+    importLayout(layouts: Glue42Workspaces.WorkspaceLayout[], mode: "replace" | "merge"): Promise<void>;
     handleOnSaved(callback: (layout: Glue42Workspaces.WorkspaceLayout) => void): UnsubscribeFunction;
     handleOnRemoved(callback: (layout: Glue42Workspaces.WorkspaceLayout) => void): UnsubscribeFunction;
     restoreItem(itemId: string): Promise<void>;
     maximizeItem(itemId: string): Promise<void>;
     changeFrameState(frameId: string, state: Glue42Workspaces.FrameState): Promise<void>;
+    getFrameBounds(frameId: string): Promise<Glue42Workspaces.FrameBounds>;
     getFrameState(frameId: string): Promise<Glue42Workspaces.FrameState>;
     focusItem(itemId: string): Promise<void>;
     closeItem(itemId: string, frame?: Glue42Workspaces.Frame): Promise<void>;
@@ -48,7 +50,14 @@ export interface WorkspacesController {
     moveWindowTo(itemId: string, newParentId: string): Promise<void>;
     getSnapshot(itemId: string, type: "workspace" | "frame"): Promise<WorkspaceSnapshotResult | FrameSnapshotResult>;
     setItemTitle(itemId: string, title: string): Promise<void>;
+    flatChildren(children: Child[]): Child[];
     refreshChildren(config: RefreshChildrenConfig): Child[];
     iterateFindChild(children: Child[], predicate: (child: Child) => boolean): Child;
     iterateFilterChildren(children: Child[], predicate: (child: Child) => boolean): Child[];
+    hibernateWorkspace(workspaceId: string): Promise<void>;
+    resumeWorkspace(workspaceId: string): Promise<void>;
+    lockWorkspace(workspaceId: string, config?: WorkspaceLockConfig): Promise<void>;
+    lockWindow(windowPlacementId: string, config?: WorkspaceWindowLockConfig): Promise<void>;
+    lockContainer(itemId: string, type: SubParentTypes["type"], config?: ContainerLockConfig): Promise<void>;
+    getFrameConstraints(frameId: string): Promise<Constraints>;
 }

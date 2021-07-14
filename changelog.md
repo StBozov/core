@@ -1,3 +1,93 @@
+## Glue42 Core v2.0.0 (2021-05-11)
+
+#### :rocket: New Feature
+* `fdc3`
+  * [#202](https://github.com/Glue42/core/pull/202) Update @glue42/fdc3 to the FDC3 v1.2 spec ([@Indeavr](https://github.com/Indeavr))
+  * [#171](https://github.com/Glue42/core/pull/171) Adapt @glue42/fdc3 (and fdc3-demos) for Glue42 Core v2 ([@ggeorgievx](https://github.com/ggeorgievx))
+* `web-platform`, `workspaces-api`, `workspaces-ui-core`
+  * [#198](https://github.com/Glue42/core/pull/198) Implement loading strategies ([@SvetozarMateev](https://github.com/SvetozarMateev))
+* `web-platform`, `web`, `workspaces-api`, `workspaces-ui-core`
+  * [#183](https://github.com/Glue42/core/pull/183) Implement hibernate resume workspace ([@SvetozarMateev](https://github.com/SvetozarMateev))
+* `web-platform`, `web`
+  * [#186](https://github.com/Glue42/core/pull/186) Implement Read-only Environment ([@flashd2n](https://github.com/flashd2n))
+* `core`, `golden-layout`, `ng`, `react-hooks`, `web-platform`, `web`, `workspaces-api`, `workspaces-ui-core`, `workspaces-ui-react`
+  * [#165](https://github.com/Glue42/core/pull/165) Implement V2 of Glue42 Core ([@flashd2n](https://github.com/flashd2n))
+  * [#167](https://github.com/Glue42/core/pull/167) Release stable Glue42 Core V2 ([@flashd2n](https://github.com/flashd2n))
+* `golden-layout`, `workspaces-api`, `workspaces-ui-core`, `workspaces-ui-react`
+  * [#159](https://github.com/Glue42/core/pull/159) Workspaces pinned tabs ([@SvetozarMateev](https://github.com/SvetozarMateev))
+* `golden-layout`, `workspaces-api`, `workspaces-app`, `workspaces-ui-core`, `workspaces-ui-react`
+  * [#153](https://github.com/Glue42/core/pull/153) Workspaces extensions ([@SvetozarMateev](https://github.com/SvetozarMateev))
+* `web-platform`, `web`, `workspaces-ui-react`
+  * [#187](https://github.com/Glue42/core/pull/187) Implement Remote Stores For Applications ([@flashd2n](https://github.com/flashd2n))
+* `dev-workspaces-frame`, `fdc3`, `ng`, `react-hooks`, `web-platform`, `web`, `workspaces-ui-core`
+  * [#176](https://github.com/Glue42/core/pull/176) Added AppManager inMemory operations ([@flashd2n](https://github.com/flashd2n))
+#### :bug: Bug Fix
+* `workspaces-ui-core`
+  * [#209](https://github.com/Glue42/core/pull/209) Fix default workspace context value in layout ([@SvetozarMateev](https://github.com/SvetozarMateev))
+  * [#206](https://github.com/Glue42/core/pull/206) Added empty object as default value ([@SvetozarMateev](https://github.com/SvetozarMateev))
+* `workspaces-api`
+  * [#200](https://github.com/Glue42/core/pull/200) Fixes the workspace windows reference refresh ([@flashd2n](https://github.com/flashd2n))
+  * [#193](https://github.com/Glue42/core/pull/193) Workspaces refresh now correctly reuses nested references ([@flashd2n](https://github.com/flashd2n))
+* `web`, `workspaces-ui-core`
+  * [#182](https://github.com/Glue42/core/pull/182) Correctly set workspace app titles ([@flashd2n](https://github.com/flashd2n))
+* `web-platform`, `web`, `workspaces-ui-core`
+  * [#181](https://github.com/Glue42/core/pull/181) Fixes issue with restoring workspace windows titles ([@flashd2n](https://github.com/flashd2n))
+* `web`
+  * [#150](https://github.com/Glue42/core/pull/150) Fix a race where `stop()` resolves before the application is removed from the instances array ([@ggeorgievx](https://github.com/ggeorgievx))
+* `fdc3`
+  * [#163](https://github.com/Glue42/core/pull/163) Fix a race in the @glue42/fdc3 Glue42 Enterprise channel sync ([@ggeorgievx](https://github.com/ggeorgievx))
+  * [#155](https://github.com/Glue42/core/pull/155) Consider the glue42gd.fdc3InitsGlue flag ([@ggeorgievx](https://github.com/ggeorgievx))
+* `ng`
+  * [#160](https://github.com/Glue42/core/pull/160) Improve ng compatibility with angular versions less than 9 ([@flashd2n](https://github.com/flashd2n))
+
+#### :nail_care: Enhancement
+* `core`, `web-platform`, `workspaces-ui-core`
+  * [#185](https://github.com/Glue42/core/pull/185) Enable platform frames ([@flashd2n](https://github.com/flashd2n))
+* `core`, `web-platform`, `web`
+  * [#174](https://github.com/Glue42/core/pull/174) Change flags to be a string => any mapping (instead of string => string) ([@ggeorgievx](https://github.com/ggeorgievx))
+* `core`
+  * [#158](https://github.com/Glue42/core/pull/158) Replace a static API InstanceWrapper property with an injected API ([@ggeorgievx](https://github.com/ggeorgievx))
+* `web-platform`, `web`
+  * [#172](https://github.com/Glue42/core/pull/172) Added ClientOnly mode for the platform ([@flashd2n](https://github.com/flashd2n))
+* `web`
+  * [#164](https://github.com/Glue42/core/pull/164) Add tests for all interop methods ([@ggeorgievx](https://github.com/ggeorgievx))
+  * [#152](https://github.com/Glue42/core/pull/152) Simplify the instance lifetime tracking ([@ggeorgievx](https://github.com/ggeorgievx))
+  * [#147](https://github.com/Glue42/core/pull/147) Add an optional requestTimeout property to the RemoteSource interface ([@ggeorgievx](https://github.com/ggeorgievx))
+  * [#169](https://github.com/Glue42/core/pull/169) Add tests for all intents methods ([@ggeorgievx](https://github.com/ggeorgievx))
+* `fdc3`
+  * [#145](https://github.com/Glue42/core/pull/145) Change `findIntent()` and `findIntentsByContext()` to return only the app intents and the dynamic instance intents ([@ggeorgievx](https://github.com/ggeorgievx))
+* `fdc3`, `web`
+  * [#151](https://github.com/Glue42/core/pull/151) Use the FDC3 typings provided by the newly published @finos/fdc3 package ([@ggeorgievx](https://github.com/ggeorgievx))
+  * [#149](https://github.com/Glue42/core/pull/149) Add tests for all appManager methods ([@ggeorgievx](https://github.com/ggeorgievx))
+* `golden-layout`
+  * [#146](https://github.com/Glue42/core/pull/146) Added splitter events ([@SvetozarMateev](https://github.com/SvetozarMateev))
+
+#### :memo: Documentation
+* Other
+  * [#204](https://github.com/Glue42/core/pull/204) bugfix: js-tutorial ([@swseverance](https://github.com/swseverance))
+  * [#173](https://github.com/Glue42/core/pull/173) Edited the JS tutorial ([@arjunah](https://github.com/arjunah))
+  * [#168](https://github.com/Glue42/core/pull/168) Edited the React and Angular wrappers docs ([@arjunah](https://github.com/arjunah))
+* `web-platform`, `web`
+  * [#178](https://github.com/Glue42/core/pull/178) Updated Live Examples to V2 ([@flashd2n](https://github.com/flashd2n))
+* `web-platform`, `web`, `workspaces-ui-core`
+  * [#177](https://github.com/Glue42/core/pull/177) Added Angular tutorial V2 And Start of Day Demo Updated To V2  ([@flashd2n](https://github.com/flashd2n))
+* `workspaces-api`
+  * [#157](https://github.com/Glue42/core/pull/157) Fixed broken links ([@arjunah](https://github.com/arjunah))
+
+#### :house: Internal
+* `fdc3`, `web-platform`, `web`
+  * [#180](https://github.com/Glue42/core/pull/180) Nest the intent metadata inside a intent property of the method flags ([@ggeorgievx](https://github.com/ggeorgievx))
+
+#### Committers: 7
+- Georgi Georgiev ([@ggeorgievx](https://github.com/ggeorgievx))
+- Hristo Ivanov ([@arjunah](https://github.com/arjunah))
+- Kalin Kostov ([@flashd2n](https://github.com/flashd2n))
+- Svetozar Mateev ([@SvetozarMateev](https://github.com/SvetozarMateev))
+- Grigor Penev [@GrigorPenev](https://github.com/GrigorPenev)
+- Martin Donevski ([@Indeavr](https://github.com/Indeavr))
+- [@swseverance](https://github.com/swseverance)
+
+
 ## Glue42 Core v1.2.0 (2020-10-12)
 
 #### :rocket: New Feature

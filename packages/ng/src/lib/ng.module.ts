@@ -1,4 +1,4 @@
-import { NgModule, APP_INITIALIZER, ModuleWithProviders, Optional, SkipSelf } from "@angular/core";
+import { NgModule, APP_INITIALIZER, ModuleWithProviders } from "@angular/core";
 import { Glue42Store } from "./glue-store.service";
 import { Glue42NgSettings } from "./types";
 import { Glue42Initializer } from "./glue-initializer.service";
@@ -10,13 +10,6 @@ export const initFactory = (initializer: Glue42Initializer) => (): void | Promis
 // @dynamic
 @NgModule()
 export class Glue42Ng {
-
-    constructor(@Optional() @SkipSelf() parentModule?: Glue42Ng) {
-        if (parentModule) {
-            throw new Error("Glue42Ng Module is already loaded. Import it in the AppModule only");
-        }
-    }
-
     public static forRoot(settings?: Glue42NgSettings): ModuleWithProviders<Glue42Ng> {
         return {
             ngModule: Glue42Ng,

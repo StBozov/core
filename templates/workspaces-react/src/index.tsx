@@ -4,18 +4,27 @@ import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 import { GlueProvider } from '@glue42/react-hooks';
-import Glue, { Glue42 } from "@glue42/desktop";
-import GlueWeb, { Glue42Web } from "@glue42/web";
+import Glue from "@glue42/desktop";
+import GlueWeb from "@glue42/web";
 import GlueWorkspaces from "@glue42/workspaces-api";
 
 declare const window: Window & { glue42gd: any };
 
 ReactDOM.render(
   <React.StrictMode>
-    <GlueProvider glueFactory={(config: Glue42.Config | Glue42Web.Config | undefined) => {
-      return window.glue42gd ?
-        Glue(Object.assign(config, { libraries: [GlueWorkspaces], appManager: "skipIcons" }) as Glue42.Config) :
-        GlueWeb(Object.assign(config, { application: "Workspaces", libraries: [GlueWorkspaces], appManager: true }) as Glue42Web.Config)
+    <GlueProvider settings={{
+      web: {
+        config: { libraries: [GlueWorkspaces] },
+        factory: (config) => {
+          return GlueWeb(config);
+        }
+      },
+      desktop: {
+        config: { libraries: [GlueWorkspaces], appManager: "skipIcons" },
+        factory: (config) => {
+          return Glue(config);
+        }
+      }
     }}>
       <App />
     </GlueProvider>

@@ -160,7 +160,7 @@ const GlueCore = (userConfig?: Glue42Core.Config, ext?: Glue42Core.Extension): P
             logger: _logger.subLogger("metrics"),
             canUpdateMetric,
             system: "Glue42",
-            service: identity?.service ?? "metrics-service",
+            service: identity?.service ?? glue42gd?.applicationName ?? internalConfig.application,
             instance: identity?.instance ?? identity?.windowId ?? shortid(),
             disableAutoAppSystem,
             pagePerformanceMetrics: typeof config !== "boolean" ? config?.pagePerformanceMetrics : undefined
@@ -319,7 +319,9 @@ const GlueCore = (userConfig?: Glue42Core.Config, ext?: Glue42Core.Extension): P
                     return {
                         name: key,
                         duration: t.endTime - t.startTime,
-                        marks: t.marks
+                        marks: t.marks,
+                        startTime: t.startTime,
+                        endTime: t.endTime
                     };
                 });
             }
@@ -359,7 +361,7 @@ const GlueCore = (userConfig?: Glue42Core.Config, ext?: Glue42Core.Extension): P
                 return function () {
                     // tslint:disable-next-line:no-console
                     glue.logger.warn(`glue.js - 'glue.agm.${wrong}' method is deprecated, use 'glue.interop.${proper}' instead.`);
-                    fn.apply(glue.agm, arguments);
+                    return fn.apply(glue.agm, arguments);
                 };
             };
             // extend glue.agm with legacy support

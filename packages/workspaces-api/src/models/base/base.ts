@@ -1,11 +1,15 @@
 import { Workspace } from "../workspace";
 import { ParentBuilder } from "../../builders/parentBuilder";
 import { strictParentDefinitionDecoder, swimlaneWindowDefinitionDecoder, checkThrowCallback } from "../../shared/decoders";
-import { SubParent, AllParentTypes, Child, SubParentTypes, AllParent } from "../../types/builders";
+import { SubParent, AllParentTypes, Child, SubParentTypes, AllParent, ContainerLockConfig } from "../../types/builders";
 import { PrivateDataManager } from "../../shared/privateDataManager";
 import { ParentPrivateData, WorkspacePrivateData } from "../../types/privateData";
 import { Window } from "../../models/window";
 import { Glue42Workspaces } from "../../../workspaces";
+import { Group } from "../group";
+import { Row } from "../row";
+import { Column } from "../column";
+import { ColumnSnapshotConfig, RowSnapshotConfig } from "../../types/protocol";
 
 interface PrivateData {
     manager: PrivateDataManager;
@@ -20,7 +24,7 @@ const getData = (base: Base, model: AllParentTypes): WorkspacePrivateData | Pare
         return manager.getWorkspaceData(model);
     }
 
-    return data.get(base).manager.getParentData(model);
+    return data.get(base).manager.getParentData(model as SubParentTypes);
 };
 
 const getWindowFromPlacementId = (base: Base, placemenId: string): Window => {
@@ -157,6 +161,144 @@ export class Base {
         const controller = getData(this, model).controller;
 
         await controller.closeItem(modelData.id);
+
+        if (modelData.parent instanceof Workspace) {
+            await modelData.parent.refreshReference();
+        } else {
+            await this.getMyWorkspace(modelData.parent).refreshReference();
+        }
+    }
+
+    public async lockContainer(model: SubParentTypes, config?: ContainerLockConfig): Promise<void> {
+        const modelData = getData(this, model) as ParentPrivateData;
+
+        const controller = getData(this, model).controller;
+
+        await controller.lockContainer(modelData.id, model.type, config);
+
+        if (modelData.parent instanceof Workspace) {
+            await modelData.parent.refreshReference();
+        } else {
+            await this.getMyWorkspace(modelData.parent).refreshReference();
+        }
+    }
+
+    public getAllowDrop(model: SubParentTypes): boolean {
+        return getData(this, model).config.allowDrop;
+    }
+
+    public getAllowExtract(model: Group): boolean {
+        const privateData = getData(this, model);
+        if (privateData.type !== "group") {
+            throw new Error(`Cannot get allow extract from private data${privateData.type} with config ${privateData.type !== "workspace" ? privateData.config.type : ""}`);
+        }
+        return privateData.config.allowExtract;
+    }
+
+    public getShowMaximizeButton(model: Group): boolean {
+        const privateData = getData(this, model);
+        if (privateData.type !== "group") {
+            throw new Error(`Cannot get show maximize button from private data${privateData.type} with config ${privateData.type !== "workspace" ? privateData.config.type : ""}`);
+        }
+        return privateData.config.showMaximizeButton;
+    }
+
+    public getShowEjectButton(model: Group): boolean {
+        const privateData = getData(this, model);
+        if (privateData.type !== "group") {
+            throw new Error(`Cannot get show eject button from private data${privateData.type} with config ${privateData.type !== "workspace" ? privateData.config.type : ""}`);
+        }
+        return privateData.config.showEjectButton;
+    }
+
+    public getShowAddWindowButton(model: Group): boolean {
+        const privateData = getData(this, model);
+        if (privateData.type !== "group") {
+            throw new Error(`Cannot get add window button from private data${privateData.type} with config ${privateData.type !== "workspace" ? privateData.config.type : ""}`);
+        }
+        return privateData.config.showAddWindowButton;
+    }
+
+    public getMinWidth(model: SubParentTypes): number {
+        const privateData = getData(this, model);
+
+        return privateData.config.minWidth;
+    }
+
+    public getMaxWidth(model: SubParentTypes): number {
+        const privateData = getData(this, model);
+
+        return privateData.config.maxWidth;
+    }
+
+    public getMinHeight(model: SubParentTypes): number {
+        const privateData = getData(this, model);
+
+        return privateData.config.minHeight;
+    }
+
+    public getMaxHeight(model: SubParentTypes): number {
+        const privateData = getData(this, model);
+
+        return privateData.config.maxHeight;
+    }
+
+    public getWidthInPx(model: SubParentTypes): number {
+        const privateData = getData(this, model);
+
+        return privateData.config.widthInPx;
+    }
+
+    public getHeightInPx(model: SubParentTypes): number {
+        const privateData = getData(this, model);
+
+        return privateData.config.heightInPx;
+    }
+
+    public getIsPinned(model: Column | Row): boolean {
+        const privateData = getData(this, model);
+
+        return (privateData.config as RowSnapshotConfig | ColumnSnapshotConfig).isPinned;
+    }
+
+    public async setHeight(model: Row, height: number): Promise<void> {
+        const modelData = getData(this, model) as ParentPrivateData;
+        const { controller } = modelData;
+
+        await controller.resizeItem(getData(this, model).id, {
+            height
+        });
+
+        if (modelData.parent instanceof Workspace) {
+            await modelData.parent.refreshReference();
+        } else {
+            await this.getMyWorkspace(modelData.parent).refreshReference();
+        }
+    }
+
+    public async setWidth(model: Column, width: number): Promise<void> {
+        const modelData = getData(this, model) as ParentPrivateData;
+        const { controller } = modelData;
+
+        await controller.resizeItem(getData(this, model).id, {
+            width
+        });
+
+        if (modelData.parent instanceof Workspace) {
+            await modelData.parent.refreshReference();
+        } else {
+            await this.getMyWorkspace(modelData.parent).refreshReference();
+        }
+    }
+
+    public async setSize(model: Group, width?: number, height?: number): Promise<void> {
+        const modelData = getData(this, model) as ParentPrivateData;
+        const { controller } = modelData;
+
+        await controller.resizeItem(getData(this, model).id, {
+            width,
+            height
+        });
 
         if (modelData.parent instanceof Workspace) {
             await modelData.parent.refreshReference();

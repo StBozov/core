@@ -1,6 +1,5 @@
 /*eslint indent: [2, 4, {"SwitchCase": 1}]*/
 import CallbackFactory from "callback-registry";
-import { EnterpriseController } from "../controllers/enterprise";
 import { Bridge } from "../communication/bridge";
 import { InteropTransport } from "../communication/interop-transport";
 import { BaseBuilder } from "../builders/baseBuilder";
@@ -12,18 +11,17 @@ import { FrameCreateConfig, ModelCreateConfig, WindowCreateConfig, WorkspaceIoCC
 import { Frame } from "../models/frame";
 import { Window } from "../models/window";
 import { Workspace } from "../models/workspace";
-import { ChildSnapshotResult, SwimlaneWindowSnapshotConfig, ParentSnapshotConfig } from "../types/protocol";
-import { Child } from "../types/builders";
+import { ChildSnapshotResult } from "../types/protocol";
+import { AllParentTypes, Child } from "../types/builders";
 import { Row } from "../models/row";
 import { Column } from "../models/column";
 import { Group } from "../models/group";
 import { Base } from "../models/base/base";
 import { Glue42Workspaces } from "../../workspaces";
-import { CoreController } from "../controllers/core";
 import { WorkspacesController } from "../types/controller";
-import { CoreFrameUtils } from "../communication/core-frame-utils";
 import { InteropAPI, WindowsAPI, LayoutsAPI, ContextsAPI } from "../types/glue";
 import { BaseController } from "../controllers/base";
+import { MainController } from "../controllers/main";
 
 export class IoC {
 
@@ -38,8 +36,7 @@ export class IoC {
         private readonly agm: InteropAPI,
         private readonly windows: WindowsAPI,
         private readonly layouts: LayoutsAPI,
-        private readonly contexts: ContextsAPI,
-        private readonly assetsBaseLocation: string
+        private readonly contexts: ContextsAPI
     ) { }
 
     public get baseController(): BaseController {
@@ -52,9 +49,7 @@ export class IoC {
 
     public get controller(): WorkspacesController {
         if (!this._controllerInstance) {
-            this._controllerInstance = window.glue42gd ?
-                new EnterpriseController(this.bridge, this.baseController) :
-                new CoreController(this.bridge, new CoreFrameUtils(this.agm, this.windows, this.bridge, this.assetsBaseLocation), this.layouts, this.baseController);
+            this._controllerInstance = new MainController(this.bridge, this.baseController);
         }
         return this._controllerInstance;
     }
@@ -89,8 +84,8 @@ export class IoC {
         return this._parentBaseInstance;
     }
 
-    public async initiate(): Promise<void> {
-        await this.transport.initiate();
+    public async initiate(actualWindowId: string): Promise<void> {
+        await this.transport.initiate(actualWindowId);
     }
 
     public getModel<T extends ModelTypes>(type: ModelTypes, createConfig: ModelCreateConfig): ModelMaps[T] {
@@ -131,13 +126,15 @@ export class IoC {
 
                 const builtChildren = this.buildChildren(children, frame, workspace, newParent);
 
-                const parentPrivateData: ParentPrivateData = {
-                    id, parent, frame, workspace, config, type,
+                const parentPrivateData = {
+                    id, parent, frame, workspace,
+                    config,
+                    type,
                     controller: this.controller,
                     children: builtChildren,
                 };
 
-                this.privateDataManager.setParentData(newParent, parentPrivateData);
+                this.privateDataManager.setParentData(newParent, parentPrivateData as ParentPrivateData);
 
                 return newParent as ModelMaps[T];
             }
@@ -187,33 +184,34 @@ export class IoC {
         }
     }
 
-    private buildChildren(children: ChildSnapshotResult[], frame: Frame, workspace: Workspace, parent: Workspace | Row | Column | Group): Child[] {
+    private buildChildren(children: ChildSnapshotResult[], frame: Frame, workspace: Glue42Workspaces.Workspace, parent: AllParentTypes): Child[] {
         return children.map<Child>((child) => {
             switch (child.type) {
                 case "window": return this.getModel<"window">("window", {
                     id: child.id,
-                    config: child.config as SwimlaneWindowSnapshotConfig,
+                    config: child.config,
                     frame, workspace, parent
-                });
+                } as WindowCreateConfig);
                 case "column": return this.getModel<"column">(child.type, {
                     id: child.id,
-                    config: child.config as ParentSnapshotConfig,
+                    config: child.config,
                     children: child.children,
                     frame, workspace, parent
-                });
+                } as ParentCreateConfig);
                 case "row": return this.getModel<"row">(child.type, {
                     id: child.id,
-                    config: child.config as ParentSnapshotConfig,
+                    config: child.config,
                     children: child.children,
                     frame, workspace, parent
-                });
+                } as ParentCreateConfig);
                 case "group": return this.getModel<"group">(child.type, {
                     id: child.id,
-                    config: child.config as ParentSnapshotConfig,
+                    config: child.config,
                     children: child.children,
                     frame, workspace, parent
-                });
-                default: throw new Error(`Unsupported child type: ${child.type}`);
+                } as ParentCreateConfig);
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                default: throw new Error(`Unsupported child type: ${(child as any).type}`);
             }
         });
     }

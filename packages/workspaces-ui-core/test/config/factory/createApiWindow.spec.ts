@@ -11,18 +11,26 @@ describe("createApiWindow() Should", () => {
     const mockTitle = "mockTitle";
     const mockPositionIndex = 0;
     const mockWorkspaceId = "mockWorkspaceId";
+    const mockAllowExtract = true;
+    const mockShowCloseButton = true;
+    const mockMinWidth = 0;
+    const mockMinHeight = 0;
+    const mockMaxWidth = 1000;
+    const mockMaxHeight = 1000;
+    const mockWidthInPx = 100;
+    const mockHeightInPx = 100;
 
     let factory: WorkspacesConfigurationFactory;
 
-    before(()=>{
+    before(() => {
         const glueStub: any = {
             appManager: {
                 instances: () => []
             }
-        }
+        };
 
         factory = new WorkspacesConfigurationFactory(glueStub);
-    })
+    });
 
     it("return the correct window object when the id is string and all optional args are present", () => {
         const expectedResult = {
@@ -38,7 +46,15 @@ describe("createApiWindow() Should", () => {
                 frameId: mockFrameId,
                 positionIndex: mockPositionIndex,
                 title: mockTitle,
-                workspaceId: mockWorkspaceId
+                workspaceId: mockWorkspaceId,
+                allowExtract: mockAllowExtract,
+                showCloseButton: mockShowCloseButton,
+                minWidth: mockMinWidth,
+                maxWidth: mockMaxWidth,
+                minHeight: mockMinHeight,
+                maxHeight: mockMaxHeight,
+                widthInPx: mockWidthInPx,
+                heightInPx: mockHeightInPx
             }
         };
 
@@ -52,7 +68,15 @@ describe("createApiWindow() Should", () => {
             frameId: mockFrameId,
             positionIndex: mockPositionIndex,
             title: mockTitle,
-            workspaceId: mockWorkspaceId
+            workspaceId: mockWorkspaceId,
+            allowExtract: mockAllowExtract,
+            showCloseButton: mockShowCloseButton,
+            minWidth: mockMinWidth,
+            maxWidth: mockMaxWidth,
+            minHeight: mockMinHeight,
+            maxHeight: mockMaxHeight,
+            widthInPx: mockWidthInPx,
+            heightInPx: mockHeightInPx
         });
 
         expect(result).to.eql(expectedResult);
@@ -72,7 +96,15 @@ describe("createApiWindow() Should", () => {
                 frameId: mockFrameId,
                 positionIndex: mockPositionIndex,
                 title: mockTitle,
-                workspaceId: mockWorkspaceId
+                workspaceId: mockWorkspaceId,
+                allowExtract: mockAllowExtract,
+                showCloseButton: mockShowCloseButton,
+                minWidth: mockMinWidth,
+                maxWidth: mockMaxWidth,
+                minHeight: mockMinHeight,
+                maxHeight: mockMaxHeight,
+                widthInPx: mockWidthInPx,
+                heightInPx: mockHeightInPx
             }
         };
 
@@ -86,7 +118,15 @@ describe("createApiWindow() Should", () => {
             frameId: mockFrameId,
             positionIndex: 0,
             title: mockTitle,
-            workspaceId: mockWorkspaceId
+            workspaceId: mockWorkspaceId,
+            allowExtract: mockAllowExtract,
+            showCloseButton: mockShowCloseButton,
+            minWidth: mockMinWidth,
+            maxWidth: mockMaxWidth,
+            minHeight: mockMinHeight,
+            maxHeight: mockMaxHeight,
+            widthInPx: mockWidthInPx,
+            heightInPx: mockHeightInPx,
         });
 
         expect(result).to.eql(expectedResult);
@@ -106,7 +146,15 @@ describe("createApiWindow() Should", () => {
                 frameId: mockFrameId,
                 positionIndex: mockPositionIndex,
                 title: mockTitle,
-                workspaceId: mockWorkspaceId
+                workspaceId: mockWorkspaceId,
+                allowExtract: mockAllowExtract,
+                showCloseButton: mockShowCloseButton,
+                minWidth: mockMinWidth,
+                maxWidth: mockMaxWidth,
+                minHeight: mockMinHeight,
+                maxHeight: mockMaxHeight,
+                widthInPx: mockWidthInPx,
+                heightInPx: mockHeightInPx
             }
         };
 
@@ -120,7 +168,15 @@ describe("createApiWindow() Should", () => {
             frameId: mockFrameId,
             positionIndex: mockPositionIndex,
             title: mockTitle,
-            workspaceId: mockWorkspaceId
+            workspaceId: mockWorkspaceId,
+            allowExtract: mockAllowExtract,
+            showCloseButton: mockShowCloseButton,
+            minWidth: mockMinWidth,
+            maxWidth: mockMaxWidth,
+            minHeight: mockMinHeight,
+            maxHeight: mockMaxHeight,
+            widthInPx: mockWidthInPx,
+            heightInPx: mockHeightInPx
         });
 
         expect(result).to.eql(expectedResult);

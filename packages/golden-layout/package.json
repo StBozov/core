@@ -1,12 +1,12 @@
 {
     "name": "@glue42/golden-layout",
-    "version": "2.0.3",
+    "version": "2.1.4",
     "author": {
         "name": "Glue42",
         "url": "https://www.glue42.com"
     },
     "license": "MIT",
-    "description": "Glue42's version of golden-layout",
+    "description": "Glue42's version of golden-layout.",
     "main": "./dist/goldenlayout.js",
     "typings": "./index.d.ts",
     "files": [
@@ -26,7 +26,8 @@
         "build": "npm run build:min && npm run build:less",
         "build:min": "gulp build",
         "build:less": "grunt less",
-        "audit": "node ../../scripts/audit/index.js",
+        "audit": "echo no audit found",
+        "audit:V1": "node ../../scripts/audit/index.js",
         "preversion": "npm run build && npm run test && npm run audit",
         "version": "npm run build"
     },
@@ -38,7 +39,7 @@
         "gulp-concat": "^2.6.1",
         "gulp-insert": "^0.5.0",
         "gulp-terser": "^1.2.0",
-        "handlebars": "^4.7.6",
+        "handlebars": "^4.7.7",
         "prettier": "^1.19.1",
         "walker": "1.0.6"
     },

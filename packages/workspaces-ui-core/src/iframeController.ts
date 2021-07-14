@@ -11,89 +11,19 @@ export class IFrameController {
         this._glue = glue;
     }
 
-    public async startFrame(id: string, url: string, layoutState?: object, context?: object, windowId?: string): Promise<HTMLIFrameElement> {
-        windowId = windowId || generate();
-        if (this._idToFrame[id]) {
-            return this._idToFrame[id];
-        }
-
-        const glueWinOutsideOfWorkspace = this._glue.windows.findById(windowId);
-        if (glueWinOutsideOfWorkspace) {
-            try {
-                // Glue windows with the given id should be closed
-                await glueWinOutsideOfWorkspace.close();
-            } catch (error) {
-                // because of chrome security policy this call can fail,
-                // however the opening of a new window should continue
-            }
-        }
-
-        if (!url) {
-            throw new Error(`The url of window with itemId ${id} is undefined`);
-        }
-
-        const frame: HTMLIFrameElement = document.createElement("iframe");
-        frame.name = windowId;
-        frame.src = url;
-        document.body.appendChild(frame);
-
-        $(frame).on("load", () => {
-            try {
-                const frameDocument = frame.contentDocument || frame.contentWindow.document;
-
-                frameDocument.onclick = () => {
-                    this._registry.execute("frame-content-clicked", {});
-                };
-
-                if (layoutState) {
-                    // this.sendLayoutState(id, layoutState);
-                }
-
-                const target = frameDocument.querySelector("title");
-                const observer = new MutationObserver(() => {
-                    this._registry.execute("window-title-changed", id, frameDocument.title);
-                });
-
-                const config = {
-                    childList: true,
-                };
-
-                if (target) {
-                    observer.observe(target, config);
-                }
-
-                if (frameDocument.title) {
-                    this._registry.execute("window-title-changed", id, frameDocument.title);
-                }
-
-            } catch (error) {
-                // tslint:disable-next-line: no-console
-                console.warn(error);
-            }
-        });
-
-        this._registry.execute("frameLoaded", id);
-
-        frame.setAttribute("id", id);
-        $(frame).css("position", "absolute");
-
-        this._idToFrame[id] = frame;
-        await this.waitForWindow(windowId);
-
-        if (context) {
-            const glueWindow = this._glue.windows.findById(windowId);
-            glueWindow.setContext(context);
-        }
-
-        return frame;
+    public async startFrame(id: string, url: string, layoutState?: object, windowId?: string): Promise<HTMLIFrameElement> {
+        return this.startCore(id, url, layoutState, windowId);
     }
 
     public moveFrame(id: string, bounds: Bounds) {
         const frame = this._idToFrame[id];
-
         const jFrame = $(frame);
-        jFrame.css("top", `${bounds.top}px`);
-        jFrame.css("left", `${bounds.left}px`);
+
+        if (bounds.width !== 0 && bounds.height !== 0) {
+            jFrame.css("top", `${bounds.top}px`);
+            jFrame.css("left", `${bounds.left}px`);
+        }
+
         jFrame.css("width", `${bounds.width}px`);
         jFrame.css("height", `${bounds.height}px`);
     }
@@ -146,19 +76,24 @@ export class IFrameController {
         const frame = this._idToFrame[id];
         if (frame) {
             delete this._idToFrame[id];
-            try {
-                frame.contentWindow.dispatchEvent(new Event("beforeunload"));
-            } catch (error) {
-                // tslint:disable-next-line: no-console
-                console.warn(error);
-            }
-            frame.remove();
+            frame.contentWindow.postMessage({
+                glue42core: {
+                    type: "manualUnload"
+                }
+            }, "*");
+            setImmediate(() => {
+                frame.remove();
+                this._registry.execute("frame-removed", id);
+            });
         }
-
     }
 
     public onFrameLoaded(callback: (frameId: string) => void) {
         return this._registry.add("frameLoaded", callback);
+    }
+
+    public onFrameRemoved(callback: (frameId: string) => void) {
+        return this._registry.add("frame-removed", callback);
     }
 
     public onFrameContentClicked(callback: () => void) {
@@ -169,8 +104,43 @@ export class IFrameController {
         return this._registry.add("window-title-changed", callback);
     }
 
+    public hasFrame(id: string): boolean {
+        return !!this._idToFrame[id];
+    }
+
+    private async startCore(id: string, url: string, layoutState?: object, windowId?: string) {
+        windowId = windowId || generate();
+        if (this._idToFrame[id]) {
+            return this._idToFrame[id];
+        }
+
+        if (!url) {
+            throw new Error(`The url of window with itemId ${id} is undefined`);
+        }
+
+        const frame: HTMLIFrameElement = document.createElement("iframe");
+        frame.name = `${windowId}#wsp`;
+        (frame as any).loading = "lazy";
+        frame.style.top = "30000px";
+        frame.style.width = "30000px";
+        frame.style.width = "0px";
+        frame.style.height = "0px";
+        frame.src = url;
+        document.body.appendChild(frame);
+
+        this._registry.execute("frameLoaded", id);
+
+        frame.setAttribute("id", id);
+        $(frame).css("position", "absolute");
+
+        this._idToFrame[id] = frame;
+        await this.waitForWindow(windowId);
+
+        return frame;
+    }
+
     private waitForWindow(windowId: string) {
-        return new Promise((res, rej) => {
+        return new Promise<void>((res, rej) => {
             let unsub = () => {
                 // safety
             };

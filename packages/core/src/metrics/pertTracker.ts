@@ -50,7 +50,8 @@ export class PerfTracker {
             return;
         }
         this.lastCount = allEntries.length;
+        const jsonfiedEntries = allEntries.map((i) => i.toJSON());
 
-        this.system.stringMetric("entries", JSON.stringify(allEntries));
+        this.system.stringMetric("entries", JSON.stringify(jsonfiedEntries));
     }
 }

@@ -5,11 +5,13 @@ import {
     IntentResolution,
     Listener,
     OpenError,
-    ResolveError
+    ResolveError,
+    TargetApp
 } from "@finos/fdc3";
 import { Glue42 } from "@glue42/desktop";
 import createChannelsAgent from "./channels/channels";
 import { WindowType } from "./types/windowtype";
+import { ImplementationMetadata } from "@finos/fdc3/src/api/ImplementationMetadata";
 
 const convertGlue42IntentToFDC3AppIntent = (glueIntent: Glue42.Intents.Intent): AppIntent => {
     const { name, handlers } = glueIntent;
@@ -40,7 +42,8 @@ const convertGlue42IntentToFDC3AppIntent = (glueIntent: Glue42.Intents.Intent): 
 };
 
 const createIntentsAgent = (): Partial<DesktopAgent> => {
-    const open = async (name: string, context?: Context): Promise<void> => {
+    const open = async (target: TargetApp, context?: Context): Promise<void> => {
+        const name = typeof target === "string" ? target : target.name;
         const app = (window as WindowType).glue.appManager.application(name);
         if (typeof app === "undefined") {
             throw new Error(OpenError.AppNotFound);
@@ -85,15 +88,18 @@ const createIntentsAgent = (): Partial<DesktopAgent> => {
         return glueIntents.map((glueIntent) => convertGlue42IntentToFDC3AppIntent(glueIntent));
     };
 
-    const raiseIntent = async (intent: string, context: Context, target?: string): Promise<IntentResolution> => {
+    const raiseIntent = async (intent: string, context: Context, target?: TargetApp): Promise<IntentResolution> => {
         if (typeof intent !== "string") {
             throw new Error("Please provide the intent as a string!");
         }
         if (typeof context !== "undefined" && typeof context.type !== "string") {
             throw new Error("Please provide the context.type as a string!");
         }
-        if (typeof target !== "undefined" && typeof target !== "string") {
-            throw new Error("Please provide the target as a string!");
+        if (typeof target !== "undefined" && ((typeof target !== "string" && typeof target !== "object"))) {
+            throw new Error("Please provide the target as a string or as an AppData!");
+        }
+        if (typeof target === "object" && typeof target.name !== "string") {
+            throw new Error("Please provide the target.name as a string!");
         }
 
         // target not provided => reuse (@glue42/web takes care of starting a new instance if there isn't a running one)
@@ -101,27 +107,60 @@ const createIntentsAgent = (): Partial<DesktopAgent> => {
         // target provided; there is a running instance => target instance
         let glueTarget: "startNew" | "reuse" | { app?: string; instance?: string } = "reuse";
         if (typeof target !== "undefined") {
-            const app = (window as WindowType).glue.appManager.application(target);
+            const name = typeof target === "string" ? target : target.name;
+            const app = (window as WindowType).glue.appManager.application(name);
             if (typeof app === "undefined") {
                 throw new Error(OpenError.AppNotFound);
             }
             const appInstances = app.instances;
             if (appInstances.length === 0) {
-                glueTarget = { app: target };
+                glueTarget = { app: name };
             } else {
                 // Issue with the FDC3 specification: there is no instance targeting.
                 glueTarget = { instance: appInstances[0].id };
             }
         }
 
-        const glueIntentResult = await (window as WindowType).glue.intents.raise({ intent, context, target: glueTarget });
+        const glue42Context = {
+            type: context.type,
+            data: {
+                ...context
+            }
+        };
+        const intentRequest = {
+            intent,
+            context: glue42Context,
+            target: glueTarget
+        };
+
+        const glueIntentResult = await (window as WindowType).glue.intents.raise(intentRequest);
 
         return {
             source: glueIntentResult.handler.applicationName,
             version: "1.0.0",
-            data: glueIntentResult.result
         };
     };
+
+    const raiseIntentForContext = async (context: Context, target?: TargetApp): Promise<IntentResolution> => {
+        if (typeof context !== "undefined" && typeof context.type !== "string") {
+            throw new Error("Please provide the context.type as a string!");
+        }
+        if (typeof target !== "undefined" && ((typeof target !== "string" && typeof target !== "object"))) {
+            throw new Error("Please provide the target as a string or as an AppData!");
+        }
+        if (typeof target === "object" && typeof target.name !== "string") {
+            throw new Error("Please provide the target.name as a string!");
+        }
+
+        const appIntents: AppIntent[] = await findIntentsByContext(context);
+
+        if (!appIntents || appIntents.length === 0) {
+            throw new Error(`No intent found for contextType: ${context} !`);
+        }
+
+        return raiseIntent(appIntents[0].intent.name, context, target);
+    };
+
 
     const addIntentListener = (intent: string, handler: (context: Context) => void): Listener => {
         if (typeof intent !== "string") {
@@ -134,8 +173,12 @@ const createIntentsAgent = (): Partial<DesktopAgent> => {
             unsubscribe: (): void => console.error("Failed to unsubscribe!")
         };
 
+        const wrappedHandler = (glue42Context: Glue42.Intents.IntentContext): void => {
+            handler({ ...glue42Context.data, type: glue42Context.type || "" });
+        };
+
         (window as WindowType).fdc3GluePromise.then(() => {
-            unsub.unsubscribe = (window as WindowType).glue.intents.addIntentListener(intent, handler as (context: object) => void).unsubscribe;
+            unsub.unsubscribe = (window as WindowType).glue.intents.addIntentListener(intent, wrappedHandler).unsubscribe;
         });
 
         return unsub;
@@ -157,6 +200,17 @@ const createIntentsAgent = (): Partial<DesktopAgent> => {
         raiseIntent: async (...props): Promise<IntentResolution> => {
             await (window as WindowType).fdc3GluePromise;
             return raiseIntent(...props);
+        },
+        raiseIntentForContext: async (...props): Promise<IntentResolution> => {
+            await (window as WindowType).fdc3GluePromise;
+            return raiseIntentForContext(...props);
+        },
+        getInfo: (): ImplementationMetadata => {
+            return {
+                provider: "Glue42",
+                providerVersion: (window as WindowType).glue?.version,
+                fdc3Version: "1.2.0"
+            };
         },
         addIntentListener
     };

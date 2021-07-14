@@ -10,49 +10,56 @@ import { Glue42Workspaces } from "@glue42/workspaces-api";
  * Factory function that creates a new glue instance.
  * If your application is running in Glue42 Enterprise this will return a Glue42.Glue API, which is a super-set of the Glue42Web API.
  */
-export type GlueWebFactoryFunction = (config?: Glue42Web.Config) => Promise<Glue42Web.API | Glue42.Glue>;
-declare const GlueWebFactory: GlueWebFactoryFunction;
+export type Glue42WebFactoryFunction = (config?: Glue42Web.Config) => Promise<Glue42Web.API | Glue42.Glue>;
+declare const GlueWebFactory: Glue42WebFactoryFunction;
 export default GlueWebFactory;
 
 /**
  * @docmenuorder 1
  * @docname Glue42 Web
  * @intro
- * Glue42 Web allows JavasScript applications to integrate with other applications, part of the same Glue42 Core project via a set of APIs. With Glue42 Web you can share data with other applications, expose functionality, manage windows and notifications.
+ * Glue42 Web allows JavasScript applications to integrate with other applications that are part of the same **Glue42 Core** project via a set of APIs. With Glue42 Web you can share data with other applications, expose functionality, manage windows and notifications.
  *
  * ## Referencing
  *
- * Glue42 Web is available both as a single JavaScript file which you can include into your web applications using a `<script>` tag, and as a node.js module.
- * You can use Glue42 Web in a `script` tag include, e.g.:
+ * Glue42 Web is available both as a single JavaScript file, which you can include in your web applications using a `<script>` tag, and as a Node.js module:
  *
- * @example
  * ```html
  * <script type="text/javascript" src="web.umd.js"></script>
  * ```
  *
- * ...or as a module:
+ * Or:
  *
  * ``` javascript
- * import GlueWeb from `@glue42/web`;
+ * import GlueWeb from "&commat;glue42/web";
  * ```
  *
- * When deploying your application in production, we recommend that you always reference a specific **minified** version, e.g.:
+ * When deploying your application in production, it is recommended to always reference a specific minified version:
  *
  * ```html
  * <script type="text/javascript" src="web.umd.min.js"></script>
  * ```
  *
  * ## Initialization
- * When Glue42 Web is executed, it will attach a factory function to the global (window) object at runtime called **GlueWeb**. This factory function should be invoked with an optional configuration object to init the library and connect to the Glue42 Core Environment. The factory function returns a Promise that resolves with the glue API object.
  *
- * Example:
+ * Glue42 Web attaches a factory function to the global `window` object at runtime - `GlueWeb()`. It can be invoked with an optional configuration object to initialize the library and connect to the **Glue42 Core** environment. The factory function resolves with the `glue` API object:
+ *
  * ```javascript
- *  GlueWeb()
- *   .then((glue) => {
- *      window.glue = glue;
- *      // access APIs from glue object
- * })
- * .catch(console.log);
+ * const initializeGlue42 = async () => {
+ *
+ *     // Initializing the Workspaces library.
+ *     const initOptions = {
+ *         libraries: [GlueWorkspaces]
+ *     };
+ *
+ *     // Use the object returned from the factory function
+ *     // to access the Glue42 APIs.
+ *     const glue = await GlueWeb(initOptions);
+ *
+ *     // Here Glue42 Web is initialized and you can access all Glue42 APIs.
+ * };
+ *
+ * initializeGlue42().catch(console.error);
  * ```
  */
 export namespace Glue42Web {
@@ -66,62 +73,21 @@ export namespace Glue42Web {
      */
     export interface Config {
         /**
-         * @ignore
-         * @deprecated
-         * By default @glue42/web will try to connect to a shared worker located in "/glue/worker.js". Use this ot override the shared worker location.
-         * It is recommended to use `worker` to define a custom location for the worker script, if extends has been set to `false`.
-         * @default "/glue/worker.js"
+         * Configure the system logger. Used mostly for during development.
          */
-        worker?: string;
-
-        /**
-         * Change the log level of the internal logger
-         * @ignore
-         * @default error
-         */
-        logger?: Glue42Core.LogLevel;
-
-        /**
-         * Object used to turn on or off the applications auto-save and auto-restore functionality
-         */
-        layouts?: LayoutConfig;
-
-        /**
-         * @ignore
-         * @deprecated
-         * Defines a URL to a hosted `glue.config.json` file which the library will fetch and use to extend the built-in config defaults. We recommend setting thi to `false`, if you do not have said configuration file. Also keep in mind that if you define a custom URL, then the library will expect to find a `worker.js` file next to the config.
-         * @default true
-         */
-        extends?: string | boolean;
+        systemLogger?: SystemLogger;
 
         /**
          * Connect with GW in memory.
-         * Used for testing in node environment, where the GW isn't started by @glue42/worker-web and an inproc GW is used instead.
+         * Used for testing in node environment, where the GW isn't started by &commat;glue42/worker-web and an inproc GW is used instead.
          * @ignore
          */
         inproc?: Glue42Core.InprocGWSettings;
 
         /**
-         * Whether to initialize the Channels API or not.
-         * @default false
+         * Configure the system logger. Used mostly for during development.
          */
-        channels?: boolean;
-
-        /**
-         * Whether to initialize the Application Manager API or not.
-         * @default false
-         */
-        appManager?: boolean;
-
-        /**
-         * Application name. If not specified the Application Manager API won't know about the application and its instances.
-         */
-        application?: string;
-
-        /**
-         * todo: An object exposing settings related to the Glue42 Core resources.
-         */
-        assets?: WebAssets;
+        notifications?: Notifications.Settings;
 
         /**
          * A list of glue libraries which will be initiated internally and provide access to specific functionalities
@@ -131,6 +97,14 @@ export namespace Glue42Web {
 
     /**
      * @docmenuorder 3
+     */
+    export interface SystemLogger {
+        level?: Glue42Core.LogLevel;
+        callback?: (logInfo: any) => void;
+    }
+
+    /**
+     * @docmenuorder 4
      */
     export interface API extends Glue42Core.GlueCore {
         windows: Glue42Web.Windows.API;
@@ -146,44 +120,19 @@ export namespace Glue42Web {
     }
 
     /**
-     * @docmenuorder 4
-     */
-    export interface LayoutConfig {
-        /**
-         * If true, the set of windows opened by the application will be saved (in local storage) when the window is closed and restored
-         * when the window is started again. The data saved about each window includes URL, bounds and custom window context.
-         * It will also save and restore the window context of the current window.
-         * @default false
-         */
-        autoRestore?: boolean;
-
-        /**
-         * If set to `true`, will return glue.windows.my().context automatically when asked for layout state.
-         * @default false
-         */
-        autoSaveWindowContext?: boolean;
-    }
-
-    /**
      * @docmenuorder 5
-     */
-    export interface WebAssets {
-        /**
-         * This defines the location of the Glue42 Core assets bundle (glue.layouts.json, glue.config.json, workspaces app and more).
-         * @default "/glue"
-         */
-        location?: string;
-
-        /**
-         * If set to true the initialization logic will fetch the glue.config.json and use the defined glue object there to extend the provided config. We recommend setting this to false if you do not have a glue.config.json.
-         * @default true
-         */
-        extendConfig?: boolean;
-    }
-
-    /**
-     * @docmenuorder 6
      * @intro
+     *
+     * Using the Window Management API, your application can easily open and manipulate browser windows.
+     * This allows you to transform your traditional single-window web app into a multi-window native-like web application.
+     * The Window Management API enables applications to:
+     *
+     * - open multiple windows;
+     * - manipulate the position and size of opened windows;
+     * - pass context data upon opening new windows;
+     * - listen for and handle events related to opening and closing windows;
+     *
+     * The Window Management API is accessible through the `glue.windows` object.
      */
     export namespace Windows {
         export interface API {
@@ -204,7 +153,7 @@ export namespace Glue42Web {
              * @param url The window URL.
              * @param options Options for creating a window.
              */
-            open(name: string, url: string, options?: CreateOptions): Promise<WebWindow>;
+            open(name: string, url: string, options?: Settings): Promise<WebWindow>;
 
             /**
              * Notifies when a new window is opened.
@@ -300,8 +249,8 @@ export namespace Glue42Web {
              */
             onContextUpdated(callback: (context: any, window: WebWindow) => void): UnsubscribeFunction;
         }
-
         export interface Settings {
+
             /**
              * Distance of the top left window corner from the top edge of the screen.
              * @default 0
@@ -344,11 +293,6 @@ export namespace Glue42Web {
             relativeDirection?: RelativeDirection;
         }
 
-        export interface CreateOptions extends Settings {
-            /** Required. The URL of the app to be loaded in the new window */
-            url?: string;
-        }
-
         export type RelativeDirection = "top" | "left" | "right" | "bottom";
 
         export interface Bounds {
@@ -360,6 +304,7 @@ export namespace Glue42Web {
     }
 
     /**
+     * @docmenuorder 6
      * @ignore
      */
     namespace Layouts {
@@ -397,13 +342,13 @@ export namespace Glue42Web {
              * @param type Type of the layout to fetch.
              * @param name Name of the layout to fetch.
              */
-            get?(name: string, type: LayoutType): Promise<Layout | undefined>;
+            get(name: string, type: LayoutType): Promise<Layout | undefined>;
 
             /**
              * Returns a lightweight, summarized version of all layouts of the provided type.
              * @param type Type of the layouts to fetch.
              */
-            getAll?(type: LayoutType): Promise<LayoutSummary[]>;
+            getAll(type: LayoutType): Promise<LayoutSummary[]>;
 
             /**
              * Returns all layouts from the provided type.
@@ -415,7 +360,7 @@ export namespace Glue42Web {
              * Stores a full layout.
              * @param layout The layout object to be stored.
              */
-            import(layouts: Layout[]): Promise<void>;
+            import(layouts: Layout[], mode?: "replace" | "merge"): Promise<void>;
 
             /**
              * Saves a new layout.
@@ -476,15 +421,18 @@ export namespace Glue42Web {
 
             /** Metadata passed when the layout was saved. */
             metadata?: any;
+
+            /** Version of the layout */
+            version?: string;
         }
 
         export type ComponentType = "application" | "activity";
 
         export interface WindowComponent {
-            type: "window";
+            type: string;
 
             /** Type of the component - can be application or activity. */
-            componentType: ComponentType;
+            componentType?: ComponentType;
 
             /** Object describing the application bounds, name, context, etc. */
             state: LayoutComponentState;
@@ -508,10 +456,10 @@ export namespace Glue42Web {
             type: LayoutType;
 
             /** Context object passed when the layout was saved. */
-            context: any;
+            context?: any;
 
             /** Metadata passed when the layout was saved. */
-            metadata: any;
+            metadata?: any;
         }
 
         /**
@@ -567,8 +515,14 @@ export namespace Glue42Web {
     }
 
     /**
-     * @docmenuorder 6
+     * @docmenuorder 7
      * @intro
+     * The Notifications API provides a way to display native notifications with actions and to handle notification and action clicks.
+     * **Glue42 Core** supports all available `Notification` settings as defined in the [DOM Notifications API](https://developer.mozilla.org/en-US/docs/Web/API/Notifications_API).
+     *
+     * The **Glue42 Core** Notifications API extends the DOM Notifications API with the option to handle notification and action clicks using Interop methods.
+     *
+     * The Notifications API is accessible through the `glue.notifications` object.
      */
     export namespace Notifications {
         export interface API {
@@ -576,19 +530,45 @@ export namespace Glue42Web {
              * Raises a new notification
              * @param notification notification options
              */
-            raise(notification: Glue42NotificationOptions): Promise<Notification>;
+            raise(notification: RaiseOptions): Promise<Notification>;
+            requestPermission?(): Promise<boolean>;
         }
 
-        export interface Glue42NotificationOptions extends NotificationOptions {
+        export interface NotificationDefinition {
+            badge?: string;
+            body?: string;
+            data?: any;
+            dir?: "auto" | "ltr" | "rtl";
+            icon?: string;
+            image?: string;
+            lang?: string;
+            renotify?: boolean;
+            requireInteraction?: boolean;
+            silent?: boolean;
+            tag?: string;
+            timestamp?: number;
+            vibrate?: number[];
+        }
+
+        export interface Notification extends NotificationDefinition {
+            onclick: () => any;
+            onshow: () => any;
+        }
+
+        export interface RaiseOptions extends NotificationDefinition {
             /** the title of the notification */
             title: string;
             /** set to make the notification click invoke an interop method with specific arguments */
             clickInterop?: InteropActionSettings;
+            actions?: NotificationAction[];
         }
 
-        export interface Glue42NotificationAction extends NotificationAction {
+        export interface NotificationAction {
+            action: string;
+            title: string;
+            icon?: string;
             /** set to make the action invoke an interop method with specific arguments */
-            interop: InteropActionSettings;
+            interop?: InteropActionSettings;
         }
 
         export interface InteropActionSettings {
@@ -596,18 +576,31 @@ export namespace Glue42Web {
             arguments?: any;
             target?: "all" | "best";
         }
+
+        export type NotificationClickHandler = (glue: Glue42Web.API, notificationDefinition: NotificationDefinition) => void;
+
+        export interface ActionClickHandler {
+            action: string;
+            handler: NotificationClickHandler;
+        }
+
+        export interface Settings {
+            defaultClick: NotificationClickHandler;
+            actionClicks: ActionClickHandler[];
+        }
     }
 
     /**
-     * @docmenuorder 7
+     * @docmenuorder 8
      * @intro
-     * The **Channels** are globally accessed named contexts that allow users to dynamically group applications, instructing them to work over the same shared data object.
+     * The Glue42 Channels are globally accessed named contexts that allow users to dynamically group applications, instructing them to work over the same shared data object.
+     * The Channels API enables you to:
      *
-     * When two applications are on the same channel, they share a context data object, which they can monitor and/or update.
+     * - discover Channels - get the names and contexts of all Channels;
+     * - navigate through Channels - get the current Channel, join and leave Channels, subscribe for the event which fires when the current Channel has changed;
+     * - publish and subscribe - publish data to other applications on the same Channel and subscribe for Channel updates to react to data published by other applications;
      *
-     * The **Channels** API can be accessed through the `glue.channels` object.
-     *
-     * See also the [**Channels**](../../../../core/capabilities/channels/index.html) documentation for more details.
+     * The Channels API is accessible through the `glue.channels` object.
      */
     namespace Channels {
         /**
@@ -721,17 +714,15 @@ export namespace Glue42Web {
     }
 
     /**
-     * @docmenuorder 8
+     * @docmenuorder 9
      * @intro
-     * The **Application Management** API provides a way to manage Glue42 Core applications. It offers abstractions for:
+     * The Application Management API provides a way to manage **Glue42 Core** applications. It offers abstractions for:
      *
-     * - **Application** - a program as a logical entity, registered in Glue42 Core with some metadata (name, description, icon, etc.) and with all the configuration needed to spawn one or more instances of it. The **Application Management** API provides facilities for retrieving application metadata and for detecting when an application is started.
+     * - **Application** - a web app as a logical entity, registered in **Glue42 Core** with some metadata (name, title, version, etc.) and with all the configuration needed to spawn one or more instances of it. The Application Management API provides facilities for retrieving application metadata and for detecting when an application has been started;
      *
-     * - **Instance** - a running copy of an application. The **Application Management** API provides facilities for starting/stopping application instances and for managing its windows.
+     * - **Instance** - a running copy of an application. The Application Management API provides facilities for starting/stopping application instances and tracking application and instance related events;
      *
-     * The **Application Management** API can be accessed through `glue.appManager`.
-     *
-     * See the the [AppManager](../../../../core/capabilities/application-management/index.html) documentation for more details.
+     * The Application Management API is accessible through the `glue.appManager` object.
      */
     namespace AppManager {
         /**
@@ -740,6 +731,9 @@ export namespace Glue42Web {
         export interface API {
             /** The instance of the application. */
             myInstance: Instance;
+
+            /** An object, through which applications definitions stored in-memory can be programmatically imported or removed. */
+            inMemory: InMemory;
 
             /**
              * Returns an application by name.
@@ -796,22 +790,152 @@ export namespace Glue42Web {
             onAppChanged(callback: (app: Application) => any): UnsubscribeFunction;
         }
 
+        /** An object, through which applications definitions stored in-memory can be programmatically imported or removed. */
+        export interface InMemory {
+            /**
+             * Imports the provided collection of application definitions. Returns an import result object, which contains the names of the successfully imported apps and a list of errors if any.
+             * @param definitions A collection of application definition objects to be imported.
+             * @param mode Import mode, by default it is "replace". "replace" mode replaces all existing definitions with the provided collection, "merge" mode adds (if new) or updates (if already existing) the provided definitions.
+             */
+            import(definitions: Definition[], mode?: "replace" | "merge"): Promise<ImportResult>;
+
+            /**
+             * Removed an application definition. This method will fire onAppRemoved if a definition was removed and it will do nothing if an app with this was was not found.
+             * @param name The name of the definition to be removed.
+             */
+            remove(name: string): Promise<void>;
+
+            /** Exports all known application definitions */
+            export(): Promise<Definition[]>;
+
+            /** Removes all applications from the memory */
+            clear(): Promise<void>;
+        }
+
+        export interface ImportResult {
+            /** A list of names of the successfully imported application definitions */
+            imported: string[];
+
+            /** A list of application names and errors of all the unsuccessful imports */
+            errors: Array<{ app: string; error: string }>;
+        }
+
+        export interface DefinitionDetails {
+            url: string;
+
+            /**
+             * Distance of the top left window corner from the top edge of the screen.
+             * @default 0
+             */
+            top?: number;
+
+            /**
+             * Distance of the top left window corner from the left edge of the screen.
+             * @default 0
+             */
+            left?: number;
+
+            /**
+             * Window width.
+             * @default 400
+             */
+            width?: number;
+
+            /**
+             * Window height.
+             * @default 400
+             */
+            height?: number;
+        }
+
+        /**
+         * An intent definition.
+         */
+        export interface Intent {
+            /**
+             * The name of the intent to 'launch'. In this case the name of an Intent supported by an Application.
+             */
+            name: string;
+
+            /**
+             * An optional display name for the intent that may be used in UI instead of the name.
+             */
+            displayName?: string;
+
+            /**
+             * A comma separated list of the types of contexts the intent offered by the application can process, here the first part of the context type is the namespace e.g."fdc3.contact, org.symphony.contact".
+             */
+            contexts?: string[];
+
+            /**
+             * Custom configuration for the intent that may be required for a particular desktop agent.
+             */
+            customConfig?: object;
+        }
+
+        export interface Definition {
+            /**
+             * Application name. Should be unique.
+             */
+            name: string;
+
+            /**
+              * Type of the application - the only supported type in Glue42 Core is "window". More complex types are available in Glue42 Enterprise.
+              */
+            type: string;
+
+            /**
+             * The title of the application. Sets the window's title.
+             */
+            title?: string;
+
+            /**
+             * Application version.
+             */
+            version?: string;
+
+            /**
+             * Detailed configuration.
+             */
+            details: DefinitionDetails;
+
+            /**
+             * Generic object for passing properties, settings, etc., in the for of key/value pairs. Accessed using the app.userProperties property.
+             */
+            customProperties?: PropertiesObject;
+
+            /**
+             * Application icon.
+             */
+            icon?: string;
+
+            /**
+             * Application caption.
+             */
+            caption?: string;
+
+            /**
+             * The list of intents implemented by the Application
+             */
+            intents?: Intent[];
+        }
+
         /** Object describing an application. */
         export interface Application {
             /** Application name. */
             name: string;
 
             /** Application title. */
-            title: string;
+            title?: string;
 
             /** Application version. */
-            version: string;
+            version?: string;
 
             /** Application icon. */
-            icon: string;
+            icon?: string;
 
             /** Application caption. */
-            caption: string;
+            caption?: string;
 
             /** Generic object for passing properties, settings, etc., in the for of key/value pairs. */
             userProperties: PropertiesObject;
@@ -833,20 +957,59 @@ export namespace Glue42Web {
              * @param callback Callback function to handle the newly started instance.
              * @returns Unsubscribe function.
              */
-            onInstanceStarted: (callback: (instance: Instance) => any) => void;
+            onInstanceStarted(callback: (instance: Instance) => any): void;
 
             /**
              * Subscribes for the event which fires when an application instance is stopped.
              * @param callback Callback function to handle the newly started instance.
              * @returns Unsubscribe function.
              */
-            onInstanceStopped: (callback: (instance: Instance) => any) => void;
+            onInstanceStopped(callback: (instance: Instance) => any): void;
         }
 
         /**
          * Object with options for starting an application.
          */
-        export import ApplicationStartOptions = Glue42Web.Windows.Settings;
+        export interface ApplicationStartOptions {
+
+            /**
+             * Distance of the top left window corner from the top edge of the screen.
+             * @default 0
+             */
+            top?: number;
+
+            /**
+             * Distance of the top left window corner from the left edge of the screen.
+             * @default 0
+             */
+            left?: number;
+
+            /**
+             * Window width.
+             * @default 400
+             */
+            width?: number;
+
+            /**
+             * Window height.
+             * @default 400
+             */
+            height?: number;
+
+            /**
+             * The ID of the window that will be used to relatively position the new window.
+             * Can be combined with `relativeDirection`.
+             */
+            relativeTo?: string;
+
+            /**
+             * Direction (`"bottom"`, `"top"`, `"left"`, `"right"`) of positioning the window relatively to the `relativeTo` window. Considered only if `relativeTo` is supplied.
+             * @default "right"
+             */
+            relativeDirection?: "top" | "left" | "right" | "bottom";
+
+            waitForAGMReady?: boolean;
+        }
 
         /** Generic object for passing properties, settings, etc., in the for of key/value pairs. */
         export interface PropertiesObject {
@@ -858,14 +1021,13 @@ export namespace Glue42Web {
             /** Instance ID. */
             id: string;
 
-            /** The application object of that instance. */
-            application: Application;
-
             /** The starting context of the instance. */
-            context: object;
+            getContext(): Promise<object>;
 
             /** Interop instance. Use this to invoke Interop methods for that instance. */
             agm: Interop.Instance;
+
+            application: Application;
 
             /** Stops the instance.
              * @returns Promise that resolves when the instance has been stopped.
@@ -875,13 +1037,16 @@ export namespace Glue42Web {
     }
 
     /**
-     * @docmenuorder 9
+     * @docmenuorder 10
+     * @intro
      * In certain workflow scenarios, your application may need to start (or activate) a specific application.
      * For instance, you may have an application showing client portfolios with financial instruments.
      * When the user clicks on an instrument, you want to start an application which shows a chart for that instrument.
      * In other cases, you may want to present the user with several options for executing an action or handling data from the current application.
      *
-     * The [**Intents**](../../../../core/capabilities/intents/index.html) API makes all that possible by enabling applications to register, find and raise Intents.
+     * The Intents API makes all that possible by enabling applications to register, find and raise Intents.
+     *
+     * The Intents API is accessible through the `glue.intents` object.
      */
     namespace Intents {
         export interface API {

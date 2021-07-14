@@ -1,3 +1,30 @@
+5.4.9
+fix: Glue performance events backwards compat fix
+5.4.8
+chore: resolved dependency vulnerabilities
+5.4.7
+chore: resolved dependency vulnerabilities
+5.4.6
+chore: resolved dependency vulnerabilities
+5.4.5
+fix: resolved dependency vulnerabilities
+5.4.4
+fix: metrics - use applicationName for service
+5.4.3
+fix: web platform transport - now correctly handles the client id of and unloaded client
+5.4.2
+fix: interop - replace promise.finally to support old Angular apps
+5.4.1
+fix: metrics - default service to application name
+fix: metrics - use toJSON method of performance entries
+5.4.0
+feat: expose method's flags in interop (G4E-3780)
+feat: added interop.waitForMethod method that allows waiting for a method to appear
+fix: return unsubscribe functions from legacy interop methods (method_added, method_removed, etc) (
+5.3.0
+feat: official release with support for web transport
+5.2.8-beta.0
+feat: added web platform transport and beta core release
 5.2.7
 fix: fixed an issue which will cause the reconnection attempts after disconnect to fail because of a wrong this and also provided the correct reconnect interval
 5.2.6

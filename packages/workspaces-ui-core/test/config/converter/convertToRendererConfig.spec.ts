@@ -44,7 +44,7 @@ describe("convertToRendererConfig() Should", () => {
             appManager: {
                 instances: () => []
             }
-        }
+        };
 
         configConverter = new ConfigConverter(new WorkspacesConfigurationFactory(glueStub));
     });
@@ -82,7 +82,17 @@ describe("convertToRendererConfig() Should", () => {
                     }
                 ] as object[],
                 type,
-                workspacesOptions: {}
+                width: undefined,
+                height: undefined,
+                workspacesOptions: {},
+                workspacesConfig: {
+                    allowDrop: undefined,
+                    isPinned: undefined,
+                    minWidth: undefined,
+                    maxWidth: undefined,
+                    minHeight: undefined,
+                    maxHeight: undefined
+                },
             };
 
             const actualResult = configConverter.convertToRendererConfig(column);
@@ -106,6 +116,8 @@ describe("convertToRendererConfig() Should", () => {
             const expectedResult = {
                 type,
                 workspacesOptions: {},
+                width: undefined,
+                height: undefined,
                 content: [
                     {
                         type: "stack",
@@ -127,7 +139,14 @@ describe("convertToRendererConfig() Should", () => {
                                 type: "component",
                                 windowId: undefined,
                                 title: undefined,
-                                workspacesConfig: {}
+                                workspacesConfig: {
+                                    allowExtract: undefined,
+                                    showCloseButton: undefined,
+                                    minWidth: undefined,
+                                    maxWidth: undefined,
+                                    minHeight: undefined,
+                                    maxHeight: undefined
+                                }
                             }
                         ]
                     },
@@ -151,7 +170,14 @@ describe("convertToRendererConfig() Should", () => {
                                 type: "component",
                                 windowId: undefined,
                                 title: undefined,
-                                workspacesConfig: {}
+                                workspacesConfig: {
+                                    allowExtract: undefined,
+                                    showCloseButton: undefined,
+                                    minWidth: undefined,
+                                    maxWidth: undefined,
+                                    minHeight: undefined,
+                                    maxHeight: undefined
+                                }
                             }
                         ]
                     },
@@ -175,11 +201,26 @@ describe("convertToRendererConfig() Should", () => {
                                 type: "component",
                                 windowId: undefined,
                                 title: undefined,
-                                workspacesConfig: {}
+                                workspacesConfig: {
+                                    allowExtract: undefined,
+                                    showCloseButton: undefined,
+                                    minWidth: undefined,
+                                    maxWidth: undefined,
+                                    minHeight: undefined,
+                                    maxHeight: undefined
+                                }
                             }
                         ]
                     }
-                ] as object[]
+                ] as object[],
+                workspacesConfig: {
+                    allowDrop: undefined,
+                    isPinned: undefined,
+                    minWidth: undefined,
+                    maxWidth: undefined,
+                    minHeight: undefined,
+                    maxHeight: undefined
+                },
             };
 
             const actualResult = configConverter.convertToRendererConfig(container);
@@ -228,30 +269,69 @@ describe("convertToRendererConfig() Should", () => {
             };
             const expectedResult = {
                 type,
+                width: undefined,
+                height: undefined,
                 workspacesOptions: {},
                 content: [
                     {
                         type: type === "row" ? "column" : "row",
                         workspacesOptions: {},
+                        width: undefined,
+                        height: undefined,
                         content: [
                             emptyWindowPlaceholder
-                        ]
+                        ],
+                        workspacesConfig: {
+                            allowDrop: undefined,
+                            isPinned: undefined,
+                            minWidth: undefined,
+                            maxWidth: undefined,
+                            minHeight: undefined,
+                            maxHeight: undefined
+                        },
                     },
                     {
                         type: type === "row" ? "column" : "row",
                         workspacesOptions: {},
+                        width: undefined,
+                        height: undefined,
                         content: [
                             emptyWindowPlaceholder
-                        ]
+                        ],
+                        workspacesConfig: {
+                            allowDrop: undefined,
+                            isPinned: undefined,
+                            minWidth: undefined,
+                            maxWidth: undefined,
+                            minHeight: undefined,
+                            maxHeight: undefined
+                        },
                     },
                     {
                         type: type === "row" ? "column" : "row",
                         workspacesOptions: {},
+                        width: undefined,
+                        height: undefined,
                         content: [
                             emptyWindowPlaceholder
-                        ]
+                        ], workspacesConfig: {
+                            allowDrop: undefined,
+                            isPinned: undefined,
+                            minWidth: undefined,
+                            maxWidth: undefined,
+                            minHeight: undefined,
+                            maxHeight: undefined
+                        },
                     }
-                ]
+                ],
+                workspacesConfig: {
+                    allowDrop: undefined,
+                    isPinned: undefined,
+                    minWidth: undefined,
+                    maxWidth: undefined,
+                    minHeight: undefined,
+                    maxHeight: undefined
+                },
             };
 
             const actualResult = configConverter.convertToRendererConfig(container);
@@ -259,7 +339,6 @@ describe("convertToRendererConfig() Should", () => {
         });
 
         it(`return the golden layout config when the config is a ${type} with multiple empty groups`, () => {
-
             const container: ColumnItem | RowItem = {
                 children:
                     [
@@ -284,6 +363,9 @@ describe("convertToRendererConfig() Should", () => {
             const emptyWindowPlaceholder = {
                 type: "stack",
                 workspacesOptions: {},
+                activeItemIndex: undefined,
+                width: undefined,
+                height: undefined,
                 content: [
                     {
                         componentName: "emptyVisibleWindow",
@@ -294,18 +376,38 @@ describe("convertToRendererConfig() Should", () => {
                         type: "component",
                         workspacesConfig: {}
                     }
-                ]
+                ],
+                workspacesConfig: {
+                    allowDrop: undefined,
+                    allowExtract: undefined,
+                    showEjectButton: undefined,
+                    showMaximizeButton: undefined,
+                    showAddWindowButton: undefined,
+                    minWidth: undefined,
+                    maxWidth: undefined,
+                    minHeight: undefined,
+                    maxHeight: undefined
+                },
             };
 
             const expectedResult = {
-
                 type,
                 workspacesOptions: {},
+                width: undefined,
+                height: undefined,
                 content: [
                     emptyWindowPlaceholder,
                     emptyWindowPlaceholder,
                     emptyWindowPlaceholder
-                ]
+                ],
+                workspacesConfig: {
+                    allowDrop: undefined,
+                    isPinned: undefined,
+                    minWidth: undefined,
+                    maxWidth: undefined,
+                    minHeight: undefined,
+                    maxHeight: undefined
+                },
             };
 
             const actualResult = configConverter.convertToRendererConfig(container);
@@ -323,6 +425,9 @@ describe("convertToRendererConfig() Should", () => {
         const expectedResult = {
             type: "stack",
             workspacesOptions: {},
+            activeItemIndex: undefined,
+            width: undefined,
+            height: undefined,
             content: [
                 {
                     componentName: "emptyVisibleWindow",
@@ -333,7 +438,18 @@ describe("convertToRendererConfig() Should", () => {
                     type: "component",
                     workspacesConfig: {}
                 }
-            ]
+            ],
+            workspacesConfig: {
+                allowDrop: undefined,
+                allowExtract: undefined,
+                showEjectButton: undefined,
+                showMaximizeButton: undefined,
+                showAddWindowButton: undefined,
+                minWidth: undefined,
+                maxWidth: undefined,
+                minHeight: undefined,
+                maxHeight: undefined
+            }
         };
 
         const actualResult = configConverter.convertToRendererConfig(group);
@@ -354,6 +470,9 @@ describe("convertToRendererConfig() Should", () => {
         const expectedResult: object = {
             type: "stack",
             workspacesOptions: {},
+            activeItemIndex: undefined,
+            width: undefined,
+            height: undefined,
             content: [
                 {
                     componentName: `app${mockId}`,
@@ -368,7 +487,14 @@ describe("convertToRendererConfig() Should", () => {
                     type: "component",
                     windowId: undefined,
                     title: undefined,
-                    workspacesConfig: {}
+                    workspacesConfig: {
+                        allowExtract: undefined,
+                        showCloseButton: undefined,
+                        minWidth: undefined,
+                        maxWidth: undefined,
+                        minHeight: undefined,
+                        maxHeight: undefined
+                    }
                 },
                 {
                     componentName: `app${mockId}`,
@@ -383,7 +509,14 @@ describe("convertToRendererConfig() Should", () => {
                     type: "component",
                     title: undefined,
                     windowId: undefined,
-                    workspacesConfig: {}
+                    workspacesConfig: {
+                        allowExtract: undefined,
+                        showCloseButton: undefined,
+                        minWidth: undefined,
+                        maxWidth: undefined,
+                        minHeight: undefined,
+                        maxHeight: undefined
+                    }
                 },
                 {
                     componentName: `app${mockId}`,
@@ -398,9 +531,27 @@ describe("convertToRendererConfig() Should", () => {
                     type: "component",
                     windowId: undefined,
                     title: undefined,
-                    workspacesConfig: {}
+                    workspacesConfig: {
+                        allowExtract: undefined,
+                        showCloseButton: undefined,
+                        minWidth: undefined,
+                        maxWidth: undefined,
+                        minHeight: undefined,
+                        maxHeight: undefined
+                    }
                 }
-            ]
+            ],
+            workspacesConfig: {
+                allowDrop: undefined,
+                allowExtract: undefined,
+                showEjectButton: undefined,
+                showMaximizeButton: undefined,
+                showAddWindowButton: undefined,
+                minWidth: undefined,
+                maxWidth: undefined,
+                minHeight: undefined,
+                maxHeight: undefined
+            },
         };
 
         const actualResult = configConverter.convertToRendererConfig(group);
@@ -442,10 +593,20 @@ describe("convertToRendererConfig() Should", () => {
             content: [
                 {
                     type: "row",
+                    width: undefined,
+                    height: undefined,
                     workspacesOptions: {},
                     content: [
                         emptyWindowPlaceholder
-                    ]
+                    ],
+                    workspacesConfig: {
+                        allowDrop: undefined,
+                        isPinned: undefined,
+                        minWidth: undefined,
+                        maxWidth: undefined,
+                        minHeight: undefined,
+                        maxHeight: undefined
+                    }
                 }
             ]
         };
@@ -490,9 +651,19 @@ describe("convertToRendererConfig() Should", () => {
                 {
                     type: "column",
                     workspacesOptions: {},
+                    width: undefined,
+                    height: undefined,
                     content: [
                         emptyWindowPlaceholder
-                    ]
+                    ],
+                    workspacesConfig: {
+                        allowDrop: undefined,
+                        isPinned: undefined,
+                        minWidth: undefined,
+                        maxWidth: undefined,
+                        minHeight: undefined,
+                        maxHeight: undefined
+                    },
                 }
             ]
         };
@@ -515,6 +686,9 @@ describe("convertToRendererConfig() Should", () => {
         const emptyWindowPlaceholder = {
             type: "stack",
             workspacesOptions: {},
+            activeItemIndex: undefined,
+            width: undefined,
+            height: undefined,
             content: [
                 {
                     componentName: "emptyVisibleWindow",
@@ -525,7 +699,18 @@ describe("convertToRendererConfig() Should", () => {
                     type: "component",
                     workspacesConfig: {}
                 }
-            ]
+            ],
+            workspacesConfig: {
+                allowDrop: undefined,
+                allowExtract: undefined,
+                showEjectButton: undefined,
+                showMaximizeButton: undefined,
+                showAddWindowButton: undefined,
+                minWidth: undefined,
+                maxWidth: undefined,
+                minHeight: undefined,
+                maxHeight: undefined
+            },
         };
 
         const expectedResult = {
@@ -578,11 +763,18 @@ describe("convertToRendererConfig() Should", () => {
             content: [
                 {
                     type: "row",
+                    width: undefined,
+                    height: undefined,
                     content: [
                         {
                             type: "column",
+                            width: undefined,
+                            height: undefined,
                             content: [{
                                 type: "stack",
+                                activeItemIndex: undefined,
+                                width: undefined,
+                                height: undefined,
                                 content: [
                                     {
                                         componentName: `app${mockId}`,
@@ -597,19 +789,52 @@ describe("convertToRendererConfig() Should", () => {
                                         type: "component",
                                         windowId: undefined,
                                         title: undefined,
-                                        workspacesConfig: {}
+                                        workspacesConfig: {
+                                            allowExtract: undefined,
+                                            showCloseButton: undefined,
+                                            minWidth: undefined,
+                                            maxWidth: undefined,
+                                            minHeight: undefined,
+                                            maxHeight: undefined
+                                        }
                                     }
                                 ],
+                                workspacesConfig: {
+                                    allowDrop: undefined,
+                                    allowExtract: undefined,
+                                    showEjectButton: undefined,
+                                    showMaximizeButton: undefined,
+                                    showAddWindowButton: undefined,
+                                    minWidth: undefined,
+                                    maxWidth: undefined,
+                                    minHeight: undefined,
+                                    maxHeight: undefined
+                                },
                                 workspacesOptions: {},
                             }],
+                            workspacesConfig: {
+                                allowDrop: undefined,
+                                isPinned: undefined,
+                                minWidth: undefined,
+                                maxWidth: undefined,
+                                minHeight: undefined,
+                                maxHeight: undefined
+                            },
                             workspacesOptions: {},
                         },
                         {
                             type: "column",
+                            width: undefined,
+                            height: undefined,
                             content: [{
                                 type: "row",
+                                width: undefined,
+                                height: undefined,
                                 content: [{
                                     type: "stack",
+                                    activeItemIndex: undefined,
+                                    width: undefined,
+                                    height: undefined,
                                     content: [
                                         {
                                             componentName: `app${mockId}`,
@@ -624,16 +849,58 @@ describe("convertToRendererConfig() Should", () => {
                                             type: "component",
                                             windowId: undefined,
                                             title: undefined,
-                                            workspacesConfig: {}
+                                            workspacesConfig: {
+                                                allowExtract: undefined,
+                                                showCloseButton: undefined,
+                                                minWidth: undefined,
+                                                maxWidth: undefined,
+                                                minHeight: undefined,
+                                                maxHeight: undefined
+                                            }
                                         }
                                     ],
+                                    workspacesConfig: {
+                                        allowDrop: undefined,
+                                        allowExtract: undefined,
+                                        showEjectButton: undefined,
+                                        showMaximizeButton: undefined,
+                                        showAddWindowButton: undefined,
+                                        minWidth: undefined,
+                                        maxWidth: undefined,
+                                        minHeight: undefined,
+                                        maxHeight: undefined
+                                    },
                                     workspacesOptions: {},
                                 }],
+                                workspacesConfig: {
+                                    allowDrop: undefined,
+                                    isPinned: undefined,
+                                    minWidth: undefined,
+                                    maxWidth: undefined,
+                                    minHeight: undefined,
+                                    maxHeight: undefined
+                                },
                                 workspacesOptions: {},
                             }],
+                            workspacesConfig: {
+                                allowDrop: undefined,
+                                isPinned: undefined,
+                                minWidth: undefined,
+                                maxWidth: undefined,
+                                minHeight: undefined,
+                                maxHeight: undefined
+                            },
                             workspacesOptions: {},
                         }
                     ],
+                    workspacesConfig: {
+                        allowDrop: undefined,
+                        isPinned: undefined,
+                        minWidth: undefined,
+                        maxWidth: undefined,
+                        minHeight: undefined,
+                        maxHeight: undefined
+                    },
                     workspacesOptions: {},
                 }
             ]

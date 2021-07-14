@@ -1,4 +1,4 @@
-import { WorkspaceItem, WorkspaceSnapshot, RowItem, ColumnItem, GroupItem, WindowDefinition } from "../types/internal";
+import { WorkspaceItem, WorkspaceSnapshot, RowItem, ColumnItem, GroupItem, WindowDefinition, LoadingStrategy } from "../types/internal";
 
 //#region Requests
 
@@ -129,7 +129,37 @@ export interface GenerateLayoutRequest {
 
 export interface PingRequest {
     operation: "ping";
-    operationArguments: {}
+    operationArguments: {};
+}
+
+export interface HibernateWorkspaceRequest {
+    operation: "hibernateWorkspace";
+    operationArguments: WorkspaceSelector;
+}
+
+export interface ResumeWorkspaceRequest {
+    operation: "resumeWorkspace";
+    operationArguments: WorkspaceSelector;
+}
+
+export interface LockWorkspaceRequest {
+    operation: "lockWorkspace";
+    operationArguments: LockWorkspaceArguments;
+}
+
+export interface LockWindowRequest {
+    operation: "lockWindow";
+    operationArguments: LockWindowArguments;
+}
+
+export interface LockContainerRequest {
+    operation: "lockContainer";
+    operationArguments: LockContainerArguments;
+}
+
+export interface ResizeItemRequest {
+    operation: "resizeItem";
+    operationArguments: ResizeItemArguments;
 }
 
 //#endregion
@@ -168,6 +198,8 @@ export interface RestoreWorkspaceConfig {
     title?: string;
     context?: object;
     noTabHeader?: boolean;
+    reuseWorkspaceId?: string;
+    loadingStrategy?: LoadingStrategy;
 }
 
 export interface AddWindowArguments {
@@ -189,7 +221,9 @@ export interface AddWorkspaceChildrenArguments {
 
 export interface CreateWorkspaceArguments extends WorkspaceItem {
     // add the save config
-    saveConfig: object;
+    saveConfig?: object;
+    context?: object;
+    loadingStrategy: LoadingStrategy;
 }
 
 export interface MoveFrameArguments {
@@ -203,6 +237,68 @@ export interface MoveFrameArguments {
 export interface MoveWindowToArguments {
     itemId: string;
     containerId: string;
+}
+
+export interface LockWorkspaceArguments {
+    workspaceId: string;
+    config?: {
+        allowSplitters?: boolean;
+        allowDrop?: boolean;
+        allowDropLeft?: boolean;
+        allowDropTop?: boolean;
+        allowDropRight?: boolean;
+        allowDropBottom?: boolean;
+        allowExtract?: boolean;
+        showCloseButton?: boolean;
+        showSaveButton?: boolean;
+        showWindowCloseButtons?: boolean;
+        showAddWindowButtons?: boolean;
+        showEjectButtons?: boolean;
+    };
+}
+
+export interface LockWindowArguments {
+    windowPlacementId: string;
+    config?: {
+        showCloseButton?: boolean;
+        allowExtract?: boolean;
+    };
+}
+
+export interface LockGroupArguments {
+    type: "group";
+    itemId: string;
+    config?: {
+        allowExtract?: boolean;
+        allowDrop?: boolean;
+        showMaximizeButton?: boolean;
+        showEjectButton?: boolean;
+        showAddWindowButton?: boolean;
+    };
+}
+
+export interface LockRowArguments {
+    type: "row";
+    itemId: string;
+    config?: {
+        allowDrop?: boolean;
+    };
+}
+
+export interface LockColumnArguments {
+    type: "column";
+    itemId: string;
+    config: {
+        allowDrop?: boolean;
+    };
+}
+
+export type LockContainerArguments = LockGroupArguments | LockColumnArguments | LockRowArguments;
+
+export interface ResizeItemArguments {
+    itemId: string;
+    width?: number;
+    height?: number;
 }
 
 //#endregion
@@ -253,6 +349,9 @@ export interface GenerateLayoutArguments {
     workspaceId: string;
     name: string;
 }
+export interface WorkspaceSelector {
+    workspaceId: string;
+}
 
 //#endregion
 
@@ -261,4 +360,5 @@ export type ControlArguments = SaveLayoutRequest | DeleteLayoutRequest |
     CloseItemRequest | MaximizeItemRequest | RestoreItemRequest | AddWindowRequest | AddContainerRequest | SetItemTitleRequest |
     AddWorkspaceChildrenRequest | EjectRequest | CreateWorkspaceRequest | ForceLoadWindowRequest | FocusItemRequest |
     BundleWorkspaceRequest | IsWindowInWorkspaceRequest | GetFrameSummaryRequest | MoveFrameRequest | GetFrameSnapshotRequest |
-    GetSnapshotRequest | MoveWindowToRequest | GenerateLayoutRequest | PingRequest;
+    GetSnapshotRequest | MoveWindowToRequest | GenerateLayoutRequest | PingRequest | HibernateWorkspaceRequest | ResumeWorkspaceRequest |
+    LockWorkspaceRequest | LockContainerRequest | LockWindowRequest | ResizeItemRequest;

@@ -9,6 +9,7 @@ import gW3ProtocolFactory from "./protocols/gw3/factory";
 import { InstanceWrapper } from "./instance";
 import { Logger as PerfLogger } from "../monitoring/logger";
 import { PerfDomain } from "../monitoring/event";
+import { PromiseWrapper } from "../utils/pw";
 
 export default class Interop implements Glue42Core.AGM.API {
     public instance: Glue42Core.AGM.Instance;
@@ -16,6 +17,7 @@ export default class Interop implements Glue42Core.AGM.API {
 
     public client!: Client;
     public server!: Server;
+    public unwrappedInstance: InstanceWrapper;
     private protocol!: Protocol;
     private clientRepository: ClientRepository;
     private serverRepository: ServerRepository;
@@ -40,10 +42,10 @@ export default class Interop implements Glue42Core.AGM.API {
         }
 
         // Initialize our modules
-        InstanceWrapper.API = this;
         this.perfLogger = configuration.perfLogger;
-        this.instance = new InstanceWrapper(undefined, connection).unwrap();
-        this.clientRepository = new ClientRepository(configuration.logger.subLogger("cRep"));
+        this.unwrappedInstance = new InstanceWrapper(this, undefined, connection);
+        this.instance = this.unwrappedInstance.unwrap();
+        this.clientRepository = new ClientRepository(configuration.logger.subLogger("cRep"), this);
         this.serverRepository = new ServerRepository();
         let protocolPromise: Promise<Protocol>;
 
@@ -160,5 +162,17 @@ export default class Interop implements Glue42Core.AGM.API {
 
         result.then((obj) => end.success(obj?.all_return_values)).catch(end.error);
         return result;
+    }
+
+    public waitForMethod(name: string): Promise<Glue42Core.Interop.Method> {
+        const pw = new PromiseWrapper<Glue42Core.Interop.Method>();
+        const unsubscribe = this.client.methodAdded((m) => {
+            if (m.name === name) {
+                unsubscribe();
+                pw.resolve(m);
+            }
+        });
+
+        return pw.promise;
     }
 }

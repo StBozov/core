@@ -17,22 +17,24 @@ window.addEventListener("beforeunload", () => {
     if (done) {
         done();
     }
+
+    return "Are you sure you want to leave? changes will be lost";
 });
 
 const init = (glue: Glue42Web.API, componentFactory?: ComponentFactory) => {
     const isInitialized = manager.initialized;
     if (isInitialized) {
-        manager.init(glue, glue.agm.instance.peerId, componentFactory);
+        manager.init(glue, glue.agm.instance.windowId, facade, componentFactory);
         return;
     }
     facade.subscribeForWorkspaceEvents();
 
-    const result = manager.init(glue, glue.agm.instance.peerId, componentFactory);
+    const result = manager.init(glue, glue.agm.instance.windowId, facade, componentFactory);
 
     done = result.cleanUp;
-    facade.init(glue, glue.agm.instance.peerId).then(() => {
+    facade.init(glue, glue.agm.instance.windowId).then(() => {
         if (!startupReader.config.emptyFrame) {
-            manager.workspacesEventEmitter.raiseFrameEvent({ action: "opened", payload: { frameSummary: { id: glue.agm.instance.peerId } } });
+            manager.workspacesEventEmitter.raiseFrameEvent({ action: "opened", payload: { frameSummary: { id: glue.agm.instance.windowId } } });
         }
     }).catch(console.warn);
 
@@ -61,12 +63,16 @@ const workspacesManagerAPI: WorkspacesManager = {
         return;
     },
     unmount: () => {
+        manager.unmount();
         return;
     },
     subscribeForWindowFocused: (callback: () => void) => {
         return manager.subscribeForWindowClicked(callback);
     },
     notifyWorkspacePopupChanged: (element: HTMLElement) => {
+        return;
+    },
+    requestFocus: () => {
         return;
     }
 }

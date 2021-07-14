@@ -86,9 +86,12 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   public async bringBackToWorkspace() {
+    console.log("fetching context");
     const context = await this.glueService.getMyWindowContext();
+    console.log("context is:");
+    console.log(context);
     await this.glueService.bringBackToWorkspace(context.workspaceId);
-
+    console.log("all done, closing me");
     this.glueService.closeMe();
   }
 

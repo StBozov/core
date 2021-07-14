@@ -18,7 +18,7 @@ interface PendingSubscription {
 }
 
 const createChannelsAgent = (): ChannelsAPI => {
-    let currentChannel: Channel | null;
+    let currentChannel: Channel | null = null;
     let pendingSubscription: PendingSubscription | null;
 
     const channels: { [name: string]: Channel } = {};
@@ -88,9 +88,13 @@ const createChannelsAgent = (): ChannelsAPI => {
     };
 
     const createPendingListener = (contextType: string, handler: (context: Context) => void): Listener => {
-        let unsubscribe = (): void => { pendingSubscription = null; };
+        let unsubscribe = (): void => {
+            pendingSubscription = null;
+        };
 
-        const setActualUnsub = (actualUnsub: () => void): void => { unsubscribe = actualUnsub; };
+        const setActualUnsub = (actualUnsub: () => void): void => {
+            unsubscribe = actualUnsub;
+        };
 
         // Used inside of setCurrentChannel.
         pendingSubscription = { contextType, handler, setActualUnsub };
@@ -171,7 +175,7 @@ const createChannelsAgent = (): ChannelsAPI => {
         setCurrentChannel(channel);
     };
 
-    const getCurrentChannel = async (): Promise<Channel> => {
+    const getCurrentChannel = async (): Promise<Channel | null> => {
         await initDone;
 
         return currentChannel as Channel;

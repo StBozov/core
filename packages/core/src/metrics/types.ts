@@ -1,5 +1,4 @@
 import { Glue42Core } from "../../glue";
-import { Identity } from "../connection/types";
 import { Logger } from "../logger/logger";
 import Connection from "../connection/connection";
 
@@ -10,9 +9,9 @@ export interface MetricsSettings {
     clickStream?: boolean;
     settings?: object;
     canUpdateMetric: () => boolean;
-    system: string;
-    service: string;
-    instance: string;
+    system?: string;
+    service?: string;
+    instance?: string;
     disableAutoAppSystem: boolean;
     pagePerformanceMetrics?: Glue42Core.PagePerformanceMetricsConfig;
 }

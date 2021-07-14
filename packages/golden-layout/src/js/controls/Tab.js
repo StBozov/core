@@ -133,13 +133,20 @@ lm.utils.copy(lm.controls.Tab.prototype, {
 		}
 		const isWorkspaceLayout = this.contentItem.layoutManager.config.settings.mode === "workspace";
 		const hasLessThanTwoTabs = this.contentItem.parent.header.tabs.length < 2;
-		const isMissingWindowId = !this.contentItem.config.windowId && !this.contentItem.config.componentState.windowId;
+		const isMissingWindowId = !this.contentItem.config.windowId && (this.contentItem.config.componentState && !this.contentItem.config.componentState.windowId);
 
 		if (isWorkspaceLayout && hasLessThanTwoTabs) {
 			return;
 		}
 
 		if (!isWorkspaceLayout && isMissingWindowId) {
+			return;
+		}
+
+		if (this._layoutManager.config && this._layoutManager.config.workspacesOptions.allowExtract === false &&
+			this.contentItem.config.workspacesConfig && this.contentItem.config.workspacesConfig.allowExtract !== true) {
+			return;
+		} else if (this.contentItem.config.workspacesConfig && this.contentItem.config.workspacesConfig.allowExtract === false) {
 			return;
 		}
 

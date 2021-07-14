@@ -4,6 +4,7 @@ import { PrivateDataManager } from "../shared/privateDataManager";
 import { FrameStreamData, WorkspaceStreamData, WindowStreamData } from "../types/protocol";
 import { Glue42Workspaces } from "../../workspaces.d";
 import { FramePrivateData } from "../types/privateData";
+import { Constraints } from "../types/temp";
 
 interface PrivateData {
     manager: PrivateDataManager;
@@ -25,14 +26,20 @@ export class Frame implements Glue42Workspaces.Frame {
         return getData(this).summary.id;
     }
 
-    public resize(config: Glue42Workspaces.ResizeConfig): Promise<void> {
+    public getBounds(): Promise<Glue42Workspaces.FrameBounds> {
+        const myId = getData(this).summary.id;
+
+        return getData(this).controller.getFrameBounds(myId);
+    }
+
+    public async resize(config: Glue42Workspaces.ResizeConfig): Promise<void> {
         const validatedConfig = resizeConfigDecoder.runWithException(config);
         const myId = getData(this).summary.id;
 
         return getData(this).controller.resizeItem(myId, validatedConfig);
     }
 
-    public move(config: Glue42Workspaces.MoveConfig): Promise<void> {
+    public async move(config: Glue42Workspaces.MoveConfig): Promise<void> {
         const validatedConfig = moveConfigDecoder.runWithException(config);
 
         const myId = getData(this).summary.id;
@@ -45,21 +52,33 @@ export class Frame implements Glue42Workspaces.Frame {
     }
 
     public async state(): Promise<Glue42Workspaces.FrameState> {
+        if (!window.glue42gd) {
+            throw new Error("State operations are not supported in Glue42 Core");
+        }
         const myId = getData(this).summary.id;
         return getData(this).controller.getFrameState(myId);
     }
 
     public async minimize(): Promise<void> {
+        if (!window.glue42gd) {
+            throw new Error("State operations are not supported in Glue42 Core");
+        }
         const myId = getData(this).summary.id;
         return getData(this).controller.changeFrameState(myId, "minimized");
     }
 
     public async maximize(): Promise<void> {
+        if (!window.glue42gd) {
+            throw new Error("State operations are not supported in Glue42 Core");
+        }
         const myId = getData(this).summary.id;
         return getData(this).controller.changeFrameState(myId, "maximized");
     }
 
     public async restore(): Promise<void> {
+        if (!window.glue42gd) {
+            throw new Error("State operations are not supported in Glue42 Core");
+        }
         const myId = getData(this).summary.id;
         return getData(this).controller.changeFrameState(myId, "normal");
     }
@@ -79,6 +98,12 @@ export class Frame implements Glue42Workspaces.Frame {
         return controller.getWorkspaces((wsp) => wsp.frameId === this.id);
     }
 
+    public async constraints(): Promise<Constraints> {
+        const controller = getData(this).controller;
+        const myId = getData(this).summary.id;
+
+        return controller.getFrameConstraints(myId);
+    }
     public async restoreWorkspace(name: string, options?: Glue42Workspaces.RestoreWorkspaceConfig): Promise<Glue42Workspaces.Workspace> {
         nonEmptyStringDecoder.runWithException(name);
         const validatedOptions = restoreWorkspaceConfigDecoder.runWithException(options);

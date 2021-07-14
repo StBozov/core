@@ -72,8 +72,16 @@ export namespace Glue42Core {
         /** A way to pass custom token provider for Gateway v.3 tokens. */
         gwTokenProvider?: GwTokenProvider;
 
-        /** Path to the shared worker file that contains glue0 shared worker related code  */
+        /**
+         * @deprecated
+         * Path to the shared worker file that contains glue0 shared worker related code
+         */
         sharedWorker?: string;
+
+        /**
+         * An object containing the configuration settings when core is operating in a web platform environment
+         */
+        webPlatform?: WebPlatformConnection;
 
         /** Connect with GW in memory */
         inproc?: InprocGWSettings;
@@ -84,6 +92,11 @@ export namespace Glue42Core {
          * property. Allows out-of-band subscription and replaying of Glue42 messages.
          */
         replaySpecs?: Glue42Core.Connection.MessageReplaySpec[];
+    }
+
+    export interface WebPlatformConnection {
+        port: MessagePort;
+        windowId?: string;
     }
 
     export interface InprocGWSettings {
@@ -239,6 +252,14 @@ export namespace Glue42Core {
         message?: string;
     }
 
+    /**
+     * @intro
+     * The Logger API enables JavaScript applications to create a hierarchy of sub-loggers mapped to application components
+     * where you can control the level of logging for each component. You can also route the output of log messages (depending on the logging level)
+     * to a variety of targets - the developer console or an external output (usually a rolling file on the desktop, but actually any target the `log4net` library supports).
+     *
+     * The Logger API is accessible through the `glue.logger` object.
+     */
     export namespace Logger {
         export interface API {
 
@@ -316,32 +337,20 @@ export namespace Glue42Core {
      * @docmenuorder 1
      * @docName Interop
      * @intro
-     * The **Interop** API enables applications to:
+     * The Interop API enables applications to:
      *
-     * - **offer functionality** to other applications (JavaScript **and** native executables) by **registering** Interop methods
-     * - **discover applications which offer methods**
-     * - **invoke** (call) methods on the user's desktop and across the network
-     * - **stream and subscribe for real-time data** using the Streaming API.
+     * - offer functionality to other applications by registering Interop methods;
+     * - discover applications which offer methods;
+     * - invoke methods on the user's desktop and across the network;
+     * - stream and subscribe for real-time data using the streaming methods of the Interop API;
      *
-     * We call applications which offer methods and streams *Interop servers*, and applications which consume them - *Interop clients*, and collectively - **Interop instances**.
+     * Applications which offer methods and streams are called *Interop servers*, and applications which consume them - *Interop clients*, and collectively - *Interop instances*.
      *
      * ![Interop instances](../../../../images/interop/interop.gif)
      *
-     * Any running instance of an Interop application is identified by its **Interop instance**, which is a set of known key/value pairs uniquely identifying an application:
+     * Any running instance of an application is identified by its *Interop instance*, which is a set of known key/value pairs uniquely identifying an application.
      *
-     * **Environment** and **region** are used to qualify an instance. Usually **region** is a geographical location and **environment** refers to the deployment model (development or production).
-     *
-     * |Key|Example (Value)|Description|
-     * |---|-------|-----------|
-     * |**application**|Client Portfolio|Application name|
-     * |**region**|TICK42|e.g. EMEA, NA, APAC|
-     * |**environment**|TRAINING|e.g. DEV, SIT, UAT, PROD|
-     * |**service**|null|Optional namespace with a region and environment|
-     * |**machine**|Lambda|User machine name|
-     * |**PID**|2864|Process ID|
-     * |**user**|JSmith|Currently logged on user|
-     *
-     * See also the [**Interop**](../../../../glue42-concepts/data-sharing-between-apps/interop/javascript/index.html) documentation for more details.
+     * The Interop API is accessible through the `glue.interop` object.
      */
     export namespace Interop {
         /**
@@ -372,7 +381,7 @@ export namespace Glue42Core {
              *     }
              * );
              * ```
-             * @param name  A unique string or a [`MethodDefinition`](#!MethodDefinition) for the method to be registered.
+             * @param name  A unique string or a [`MethodDefinition`](#MethodDefinition) for the method to be registered.
              * @param handler The JavaScript function that will be called when the method is invoked.
              */
             register<T = any, R = any>(name: string | MethodDefinition, handler: (args: T, caller: Instance) => R | void | Promise<R>): Promise<void>;
@@ -380,7 +389,7 @@ export namespace Glue42Core {
             /**
              * Registers a new async Interop method. Async methods can delay returning the result
              * from the method invocation.
-             * @param name  A unique string or a [`MethodDefinition`](#!MethodDefinition) for the method to be registered.
+             * @param name  A unique string or a [`MethodDefinition`](#MethodDefinition) for the method to be registered.
              * @param handler The JavaScript function that will be called when the method is invoked. Accepts two extra arguments - a `success` and an `error` callbacks.
              * To return a result, you must call the `success` callback, or the `error` callback for errors.
              */
@@ -388,7 +397,7 @@ export namespace Glue42Core {
 
             /**
              * Unregisters an Interop method.
-             * @param definition The unique `name` or the [`MethodDefinition`](#!MethodDefinition) of the method to be unregistered.
+             * @param definition The unique `name` or the [`MethodDefinition`](#MethodDefinition) of the method to be unregistered.
              */
             unregister(definition: string | MethodDefinition): void;
 
@@ -406,9 +415,9 @@ export namespace Glue42Core {
              *         console.error(`Failed to execute Sum ${err.message}`);
              *     });
              * ```
-             * @param method The unique `name` or the [`MethodDefinition`](#!MethodDefinition) of the method to be invoked.
+             * @param method The unique `name` or the [`MethodDefinition`](#MethodDefinition) of the method to be invoked.
              * @param argumentObj A plain JavaScript object (or JSON) holding key/value pairs passed as named arguments to the handler of the registered Interop method.
-             * @param target Specifies which servers to target. Can be one of: "best", "all", [`Instance`](#!Instance), `Instance[]`.
+             * @param target Specifies which servers to target. Can be one of: "best", "all", [`Instance`](#Instance), `Instance[]`.
              * @param options An optional [`InvokeOptions`] object specifying the timeouts to discover a method and to wait for a method reply.
              * @param success An [`InvokeSuccessHandler`](#InvokeSuccessHandler) handler to be called if the invocation succeeds.
              * @param error An [`InvokeErrorHandler`](#InvokeErrorHandler) handler to be called in case of error.
@@ -439,7 +448,7 @@ export namespace Glue42Core {
              *     )
              *     .catch(console.error);
              * ```
-             * @param methodDefinition A unique string or a [`MethodDefinition`](#!MethodDefinition) for the stream to be registered.
+             * @param methodDefinition A unique string or a [`MethodDefinition`](#MethodDefinition) for the stream to be registered.
              * @param options The [`StreamOptions`](#StreamOptions) object allows you to pass several optional callbacks which let your application
              * handle subscriptions in a more detailed manner.
              * @param successCallback An optional handler to be called if the creation of the stream succeeds.
@@ -463,7 +472,7 @@ export namespace Glue42Core {
              *     	    // subscription rejected or failed
              *     });
              * ```
-             * @param methodDefinition The unique `name` or the [`MethodDefinition`](#!MethodDefinition) of the stream to subscribe to.
+             * @param methodDefinition The unique `name` or the [`MethodDefinition`](#MethodDefinition) of the stream to subscribe to.
              * @param parameters An optional [`SubscriptionParams`](#SubscriptionParams) object with parameters.
              */
             subscribe(methodDefinition: string | MethodDefinition, parameters?: SubscriptionParams): Promise<Subscription>;
@@ -506,7 +515,7 @@ export namespace Glue42Core {
 
             /**
              * Subscribes to the event which fires when an application starts offering a method. This will be called every time a server starts offering the method,
-             * whereas [`methodAdded()`](#!API-methodAdded) will be called only the first time the method is registered.
+             * whereas [`methodAdded()`](#API-methodAdded) will be called only the first time the method is registered.
              */
             serverMethodAdded(callback: (info: {
                 server: Instance;
@@ -515,7 +524,7 @@ export namespace Glue42Core {
 
             /**
              * Subscribes for the event which fires when a server stops offering a method. This will be called every time a server stops offering the method,
-             * whereas [`methodRemoved()`](#!API-methodRemoved) will be called only when the method is removed from the last application offering it.
+             * whereas [`methodRemoved()`](#API-methodRemoved) will be called only when the method is removed from the last application offering it.
              * @param callback A handler to be called when the event fires.
              */
             serverMethodRemoved(
@@ -526,13 +535,21 @@ export namespace Glue42Core {
                     }
                 ) => void): UnsubscribeFunction;
 
-            /** Returns all Interop methods registered by a server.
-             * @param server An Interop [`Instance`](#!Instance) identifying an application.
+            /**
+             * Returns all Interop methods registered by a server.
+             * @param server An Interop [`Instance`](#Instance) identifying an application.
              */
             methodsForInstance(server: Instance): Method[];
+
+            /**
+             * Wait for a method to be available. If the method is already registered this will resolve immediately
+             * otherwise will wait until the method appears
+             * @param name Name of the method to wait for
+             */
+            waitForMethod(name: string): Promise<Method>;
         }
 
-        /** Optional object with parameters passed to [`subscribe()`](#!API-subscribe) when subscribing to a stream. */
+        /** Optional object with parameters passed to [`subscribe()`](#API-subscribe) when subscribing to a stream. */
         export interface SubscriptionParams {
 
             /**
@@ -541,7 +558,7 @@ export namespace Glue42Core {
              */
             waitTimeoutMs?: number;
 
-            /** Specifies which servers to target. Can be one of: "best", "all", [`Instance`](#!Instance), `Instance[]`. */
+            /** Specifies which servers to target. Can be one of: "best", "all", [`Instance`](#Instance), `Instance[]`. */
             target?: InstanceTarget;
 
             /** A plain JavaScript object (or JSON) holding key/value pairs passed as named arguments to the handler of the registered Interop stream. */
@@ -774,6 +791,9 @@ export namespace Glue42Core {
             /** If `true`, the method is a stream. */
             supportsStreaming?: boolean;
 
+            /** Optional flags attached to the method */
+            flags?: { [key: string]: any };
+
             /** Returns all servers that provide the method. */
             getServers?(): Instance[];
         }
@@ -807,6 +827,9 @@ export namespace Glue42Core {
 
             /** If `true`, the method is a stream. */
             supportsStreaming: boolean;
+
+            /** Optional flags attached to the method */
+            flags: { [key: string]: any };
 
             /** Returns all servers that provide the method. */
             getServers(): Instance[];
@@ -899,7 +922,7 @@ export namespace Glue42Core {
             status?: number;
         }
 
-        /** Extends [`InvocationResultCore`](#!InvocationResultCore). Results from a method invocation. */
+        /** Extends [`InvocationResultCore`](#InvocationResultCore). Results from a method invocation. */
         export interface InvocationResult<T = any> extends InvocationResultCore<T> {
 
             /** An array of invocation results. */
@@ -938,7 +961,7 @@ export namespace Glue42Core {
     /**
      * @docmenuorder 5
      * @intro
-     * The Glue42 Gateway is a transport with domain specific protocols. It enables the communication between applications running in **Glue42 Desktop**.
+     * The Glue42 Gateway is a transport with domain specific protocols. It enables the communication between applications running in **Glue42 Enterprise**.
      * By default, it uses WebSockets for delivering messages to applications.
      *
      * The Connection module is used to provide connectivity between the Glue42 JavaScript modules (Interop, Metrics, etc.) and the Glue42 Gateway.
@@ -1144,7 +1167,7 @@ export namespace Glue42Core {
      * so that you can optimize your processes or tools. Metrics data is also useful for technical purposes like monitoring how well your hardware infrastructure handles the workload
      * or to track the performance of your applications.
      *
-     * See also the [**Metrics**](../../../../glue42-concepts/metrics/overview/index.html) documentation for more details.
+     * The Metrics API is accessible through the `glue.metrics` object.
      */
     export namespace Metrics {
         /** @docmenuorder 1 */
@@ -1417,18 +1440,19 @@ export namespace Glue42Core {
      * @docName Shared Contexts
      * @docmenuorder 2
      * @intro
-     * A **Shared Context** is a named object (holding a `map` of `key`/`value` pairs) that stores cross application data. The context object can hold any desktop-wide or cross-application data. Any application can update a context or * subscribe for update notifications (by using the name of the context). Apps can also react to context changes (by subscribing for context updates) or update the context at runtime.
+     * A shared context is a named object (holding a `map` of key/value pairs) that stores cross application data.
+     * The context object can hold any cross-application data. Any application can update a context or subscribe for context updates
+     * and react to them by using the name of the context.
      *
-     * The **Shared Contexts** API offers a simple and effective solution for sharing data between your applications. Imagine you have an application showing a list of clients and an application showing client portfolios. What you need, * is your "Portfolio" app to show the portfolio of a specific client that the user has selected from the "Clients" app. You can easily achieve this in a few simple steps by using the **Shared Contexts** API:
+     * The Shared Contexts API offers a simple and effective solution for sharing data between your applications.
+     * Imagine you have an application showing a list of clients and an application showing client portfolios.
+     * What you need, is your "Portfolio" app to show the portfolio of a specific client that the user has selected from the "Clients" app.
+     * You can easily achieve this in a few simple steps by using the Shared Contexts API:
      *
-     * - instruct the "Clients" app to publish updates to a context object, holding the `id` of the currently selected client;
+     * - instruct the "Clients" app to publish updates to a context object holding the `id` of the currently selected client;
      * - instruct the "Portfolio" app to subscribe for updates of that same context object and specify how the "Portfolio" app should handle the received data in order to update its current state;
      *
-     * The **Shared Contexts** API can be accessed through the `glue.contexts` object.
-     *
-     * ![Shared Contexts](../../../../images/shared-contexts/shared-contexts.gif)
-     *
-     * See also the [**Shared Contexts**](../../../../glue42-concepts/data-sharing-between-apps/shared-contexts/javascript/index.html) documentation for more details.
+     * The Shared Contexts API is accessible through the `glue.contexts` object.
      */
     export namespace Contexts {
         export interface API {
@@ -1511,19 +1535,21 @@ export namespace Glue42Core {
     }
 
     /**
-     * @docName Bus
+     * @docName Pub Sub
      * @docmenuorder 3
      * @intro
-     * The **Pub/Sub** API enables applications to:
+     * The Pub/Sub API enables applications to:
      *
      * - publish messages on a specific topic;
      * - subscribe for messages on a specific topic;
      *
-     * When an application publishes a message on a specific topic, the **Pub/Sub** API delivers it to other applications that have subscribed to that topic.
+     * When an application publishes a message on a specific topic, the Pub/Sub API delivers it to other applications that have subscribed to that topic.
      *
-     * The "raw Pub/Sub" support allows Glue42 Desktop to work with applications already using a Pub/Sub technology. Before writing new Pub/Sub based code, please consider the higher level [**Interop**](../../../../glue42-concepts/data-sharing-between-apps/interop/javascript/index.html) services provided by Glue42 Desktop: **Request/Response**, **Streaming**, **Discovery** and **Shared Contexts**. Utilizing these services, instead of creating them from scratch, can save you time and also provide you with a more robust service that can interact with applications by different dev teams and vendors.
+     * The "raw Pub/Sub" support allows Glue42 Enterprise to work with applications already using a Pub/Sub technology.
+     * Before writing new Pub/Sub based code, please consider the higher level Interop services provided by Glue42 Enterprise: Request/Response, Streaming, Discovery and Shared Contexts.
+     * Utilizing these services, instead of creating them from scratch, can save you time and also provide you with a more robust service that can interact with applications by different dev teams and vendors.
      *
-     * See also the [**Pub/Sub**](../../../../glue42-concepts/data-sharing-between-apps/pub-sub/javascript/index.html) documentation for more details.
+     * The Pub/Sub API is accessible through the `glue.bus` object.
      */
     export namespace Bus {
         export interface API {

@@ -37,6 +37,7 @@ export class GlueService {
             return;
         }
 
+        console.log(`Finding the right workspace for id: ${id}`);
         const workspace = await this.glue.workspaces.getWorkspace((wsp) => wsp.id === id);
 
         if (!workspace) {
@@ -45,17 +46,18 @@ export class GlueService {
         }
 
         let hostGroup: Glue42Workspaces.Group;
-
+        console.log("workspace found");
         if (grandParentId) {
+            console.log("have grand parent?");
             const oldParent = workspace.getBox((box) => box.id === grandParentId);
 
             if (oldParent) {
                 hostGroup = await oldParent.addGroup();
             }
         }
-
+        console.log("creating a group");
         hostGroup = hostGroup || await workspace.addGroup();
-
+        console.log("adding the window to the group");
         await hostGroup.addWindow({ windowId: this.glue.windows.my().id });
     }
 
@@ -154,7 +156,7 @@ export class GlueService {
     }
 
     public async openWindow(name: string, url: string, context: any): Promise<void> {
-        await this.glue.windows.open(name, url, { url, context });
+        await this.glue.windows.open(name, url, { context });
     }
 
     public async isInWorkspace(): Promise<boolean> {
@@ -220,8 +222,8 @@ export class GlueService {
         return this.glue.workspaces.getBuilder(builderConfig) as Glue42Workspaces.WorkspaceBuilder;
     }
 
-    private get glue(): Glue42Web.API {
-        return this.glueStore.glue;
+    public get glue(): Glue42Web.API {
+        return this.glueStore.getGlue();
     }
 
     private waitForContextId(handleContext: (context: any) => any): Promise<{ contextId: string, globalUnsubscribe: () => void }> {

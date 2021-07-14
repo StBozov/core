@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 // npm run release -- --addition,subtraction
 const { series } = require('gulp');
 const fs = require('fs');
@@ -5,11 +6,11 @@ const { join } = require('path');
 const { spawn } = require('child_process');
 const { PublishCommand } = require('@lerna/publish');
 const git = require('simple-git/promise')(__dirname);
-const sync = require('./scripts/preversion/sync.js');
+// const sync = require('./scripts/preversion/sync.js');
 
 const stableBranch = 'master';
-const releaseBranch = 'release';
-const ignored = ['.git', '.log', 'node_modules', 'packages', '.md', 'package-lock', '.vscode', 'demos', 'live-examples', '.cache', 'archive'];
+const releaseBranch = 'release-V2';
+const ignored = ['.git', '.log', 'node_modules', 'packages', '.md', 'package-lock', '.vscode', 'demos', 'live-examples', '.cache', 'archive', 'e2e', 'tutorials', 'templates'];
 const packagesDirectory = join(__dirname, '/packages/');
 let packagesDirNamesToRelease = [];
 let fullRelease = false;
@@ -104,9 +105,9 @@ const bootstrap = () => {
     });
 };
 
-const versionSync = async () => {
-    await sync(git, false);
-};
+// const versionSync = async () => {
+//     await sync(git, false);
+// };
 
 const addCommit = async (message) => {
     await git.add('.');
@@ -128,8 +129,18 @@ exports.release = series(
     syncAllContentsExceptPackages,
     syncPackagesToRelease,
     bootstrap,
-    versionSync,
     commitIsolatedPackages,
     publish,
     checkoutMaster
 );
+
+// stopped publish and checkoutMaster to allow for dist-tags
+// exports.release = series(
+//     validateReleasePackages,
+//     checkoutRelease,
+//     syncAllContentsExceptPackages,
+//     syncPackagesToRelease,
+//     bootstrap,
+//     versionSync,
+//     commitIsolatedPackages
+// );

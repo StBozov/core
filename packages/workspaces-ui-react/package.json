@@ -1,7 +1,7 @@
 {
     "name": "@glue42/workspaces-ui-react",
-    "version": "0.0.5-alpha.0",
-    "description": "React version of the workspaces ui component",
+    "version": "1.4.3",
+    "description": "React version of the workspaces ui component.",
     "author": "",
     "license": "MIT",
     "repository": "/react-workspaces",
@@ -14,7 +14,8 @@
     "scripts": {
         "build": "rollup -c ./rollup.config.js",
         "test": "",
-        "audit": "node ../../scripts/audit/index.js",
+        "audit": "echo no audit found",
+        "audit:V1": "node ../../scripts/audit/index.js",
         "preversion": "npm run build && npm run test && npm run audit",
         "version": "npm run build"
     },
@@ -22,11 +23,11 @@
         "access": "public"
     },
     "dependencies": {
-        "@glue42/workspaces-ui-core": "^0.0.4-alpha.0",
+        "@glue42/workspaces-ui-core": "^1.4.3",
         "reactjs-popup": "^2.0.4"
     },
     "peerDependencies": {
-        "@glue42/react-hooks": "^1.2.3",
+        "@glue42/react-hooks": "^2.0.0",
         "react": "^16.8.0",
         "react-dom": "^16.8.0"
     },
@@ -59,7 +60,7 @@
         "microbundle-crl": "^0.13.10",
         "npm-run-all": "^4.1.5",
         "prettier": "^2.0.4",
-        "react-scripts": "^3.4.1",
+        "react-scripts": "^4.0.3",
         "resize-observer-polyfill": "^1.5.1",
         "rollup": "^2.33.1",
         "rollup-plugin-copy": "^3.3.0",

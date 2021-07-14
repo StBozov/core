@@ -23,7 +23,15 @@ describe("convertToAPIConfig() Should", () => {
             frameId: undefined,
             positionIndex: undefined,
             title: undefined,
-            workspaceId: undefined
+            workspaceId: undefined,
+            allowExtract: undefined,
+            showCloseButton: undefined,
+            minWidth: undefined,
+            maxWidth: undefined,
+            minHeight: undefined,
+            maxHeight: undefined,
+            widthInPx: undefined,
+            heightInPx: undefined
         }
     };
 
@@ -42,17 +50,32 @@ describe("convertToAPIConfig() Should", () => {
             appManager: {
                 instances: () => []
             }
-        }
+        };
 
         configConverter = new ConfigConverter(new WorkspacesConfigurationFactory(glueStub));
-    })
+    });
 
     Array.from(["row", "column"]).forEach((type: "row" | "column") => {
         it(`return the ${type} API config without placeholder elements when the config is a ${type} with placeholder`, () => {
             const expectedResult: object = {
                 children: [],
                 type,
-                config: {},
+                config: {
+                    activeTabIndex: undefined,
+                    frameId: undefined,
+                    height: undefined,
+                    workspaceId: undefined,
+                    width: undefined,
+                    positionIndex: undefined,
+                    allowDrop: undefined,
+                    isPinned: undefined,
+                    widthInPx: undefined,
+                    heightInPx: undefined,
+                    minWidth: undefined,
+                    maxWidth: undefined,
+                    minHeight: undefined,
+                    maxHeight: undefined
+                },
                 id: undefined
             };
 
@@ -94,7 +117,22 @@ describe("convertToAPIConfig() Should", () => {
                         mockAppConfig
                     ],
                 type,
-                config: {},
+                config: {
+                    activeTabIndex: undefined,
+                    allowDrop: undefined,
+                    isPinned: undefined,
+                    widthInPx: undefined,
+                    heightInPx: undefined,
+                    frameId: undefined,
+                    height: undefined,
+                    workspaceId: undefined,
+                    width: undefined,
+                    positionIndex: undefined,
+                    minWidth: undefined,
+                    maxWidth: undefined,
+                    minHeight: undefined,
+                    maxHeight: undefined
+                },
                 id: undefined
             };
 
@@ -179,25 +217,85 @@ describe("convertToAPIConfig() Should", () => {
                     [
                         {
                             type: type === "row" ? "column" : "row",
-                            config: {},
+                            config: {
+                                activeTabIndex: undefined,
+                                frameId: undefined,
+                                height: undefined,
+                                workspaceId: undefined,
+                                width: undefined,
+                                positionIndex: undefined,
+                                allowDrop: undefined,
+                                isPinned: undefined,
+                                widthInPx: undefined,
+                                heightInPx: undefined,
+                                minWidth: undefined,
+                                maxWidth: undefined,
+                                minHeight: undefined,
+                                maxHeight: undefined
+                            },
                             id: undefined,
                             children: []
                         },
                         {
                             type: type === "row" ? "column" : "row",
-                            config: {},
+                            config: {
+                                activeTabIndex: undefined,
+                                frameId: undefined,
+                                height: undefined,
+                                workspaceId: undefined,
+                                width: undefined,
+                                positionIndex: undefined,
+                                allowDrop: undefined,
+                                isPinned: undefined,
+                                widthInPx: undefined,
+                                heightInPx: undefined,
+                                minWidth: undefined,
+                                maxWidth: undefined,
+                                minHeight: undefined,
+                                maxHeight: undefined
+                            },
                             id: undefined,
                             children: []
                         },
                         {
                             type: type === "row" ? "column" : "row",
-                            config: {},
+                            config: {
+                                activeTabIndex: undefined,
+                                frameId: undefined,
+                                height: undefined,
+                                workspaceId: undefined,
+                                width: undefined,
+                                positionIndex: undefined,
+                                allowDrop: undefined,
+                                isPinned: undefined,
+                                widthInPx: undefined,
+                                heightInPx: undefined,
+                                minWidth: undefined,
+                                maxWidth: undefined,
+                                minHeight: undefined,
+                                maxHeight: undefined
+                            },
                             id: undefined,
                             children: []
                         }
                     ],
                 type,
-                config: {},
+                config: {
+                    activeTabIndex: undefined,
+                    frameId: undefined,
+                    height: undefined,
+                    workspaceId: undefined,
+                    width: undefined,
+                    positionIndex: undefined,
+                    allowDrop: undefined,
+                    isPinned: undefined,
+                    widthInPx: undefined,
+                    heightInPx: undefined,
+                    minWidth: undefined,
+                    maxWidth: undefined,
+                    minHeight: undefined,
+                    maxHeight: undefined
+                },
                 id: undefined
             };
 
@@ -257,25 +355,97 @@ describe("convertToAPIConfig() Should", () => {
                     [
                         {
                             type: "group",
-                            config: {},
+                            config: {
+                                activeTabIndex: undefined,
+                                frameId: undefined,
+                                height: undefined,
+                                workspaceId: undefined,
+                                width: undefined,
+                                positionIndex: undefined,
+                                allowDrop: undefined,
+                                isPinned: undefined,
+                                widthInPx: undefined,
+                                heightInPx: undefined,
+                                allowExtract: undefined,
+                                showEjectButton: undefined,
+                                showAddWindowButton: undefined,
+                                showMaximizeButton: undefined,
+                                minWidth: undefined,
+                                maxWidth: undefined,
+                                minHeight: undefined,
+                                maxHeight: undefined
+                            },
                             id: undefined,
                             children: []
                         },
                         {
                             type: "group",
-                            config: {},
+                            config: {
+                                activeTabIndex: undefined,
+                                frameId: undefined,
+                                height: undefined,
+                                workspaceId: undefined,
+                                width: undefined,
+                                positionIndex: undefined,
+                                allowDrop: undefined,
+                                isPinned: undefined,
+                                widthInPx: undefined,
+                                heightInPx: undefined,
+                                allowExtract: undefined,
+                                showEjectButton: undefined,
+                                showAddWindowButton: undefined,
+                                showMaximizeButton: undefined,
+                                minWidth: undefined,
+                                maxWidth: undefined,
+                                minHeight: undefined,
+                                maxHeight: undefined
+                            },
                             id: undefined,
                             children: []
                         },
                         {
                             type: "group",
-                            config: {},
+                            config: {
+                                activeTabIndex: undefined,
+                                frameId: undefined,
+                                height: undefined,
+                                workspaceId: undefined,
+                                width: undefined,
+                                positionIndex: undefined,
+                                allowDrop: undefined,
+                                isPinned: undefined,
+                                widthInPx: undefined,
+                                heightInPx: undefined,
+                                allowExtract: undefined,
+                                showEjectButton: undefined,
+                                showAddWindowButton: undefined,
+                                showMaximizeButton: undefined,
+                                minWidth: undefined,
+                                maxWidth: undefined,
+                                minHeight: undefined,
+                                maxHeight: undefined
+                            },
                             id: undefined,
                             children: []
                         }
                     ],
                 type,
-                config: {},
+                config: {
+                    activeTabIndex: undefined,
+                    frameId: undefined,
+                    height: undefined,
+                    workspaceId: undefined,
+                    width: undefined,
+                    positionIndex: undefined,
+                    allowDrop: undefined,
+                    isPinned: undefined,
+                    widthInPx: undefined,
+                    heightInPx: undefined,
+                    minWidth: undefined,
+                    maxWidth: undefined,
+                    minHeight: undefined,
+                    maxHeight: undefined
+                },
                 id: undefined
             };
 
@@ -314,7 +484,26 @@ describe("convertToAPIConfig() Should", () => {
         const expectedResult: GroupItem = {
             children: [],
             type: "group",
-            config: {},
+            config: {
+                activeTabIndex: undefined,
+                frameId: undefined,
+                height: undefined,
+                workspaceId: undefined,
+                width: undefined,
+                positionIndex: undefined,
+                allowDrop: undefined,
+                isPinned: undefined,
+                widthInPx: undefined,
+                heightInPx: undefined,
+                allowExtract: undefined,
+                showAddWindowButton: undefined,
+                showEjectButton: undefined,
+                showMaximizeButton: undefined,
+                minWidth: undefined,
+                maxWidth: undefined,
+                minHeight: undefined,
+                maxHeight: undefined
+            },
             id: undefined
         };
 
@@ -346,7 +535,26 @@ describe("convertToAPIConfig() Should", () => {
                 mockAppConfig,
             ],
             type: "group",
-            config: {},
+            config: {
+                activeTabIndex: undefined,
+                frameId: undefined,
+                height: undefined,
+                workspaceId: undefined,
+                width: undefined,
+                positionIndex: undefined,
+                allowExtract: undefined,
+                allowDrop: undefined,
+                isPinned: undefined,
+                widthInPx: undefined,
+                heightInPx: undefined,
+                showAddWindowButton: undefined,
+                showEjectButton: undefined,
+                showMaximizeButton: undefined,
+                minWidth: undefined,
+                maxWidth: undefined,
+                minHeight: undefined,
+                maxHeight: undefined
+            },
             id: undefined
         };
 
@@ -402,7 +610,22 @@ describe("convertToAPIConfig() Should", () => {
             children: [{
                 children: [],
                 type: "row",
-                config: {},
+                config: {
+                    activeTabIndex: undefined,
+                    allowDrop: undefined,
+                    isPinned: undefined,
+                    widthInPx: undefined,
+                    heightInPx: undefined,
+                    frameId: undefined,
+                    height: undefined,
+                    workspaceId: undefined,
+                    width: undefined,
+                    positionIndex: undefined,
+                    minWidth: undefined,
+                    maxWidth: undefined,
+                    minHeight: undefined,
+                    maxHeight: undefined
+                },
                 id: undefined
             }],
             id: undefined,
@@ -450,7 +673,22 @@ describe("convertToAPIConfig() Should", () => {
             children: [{
                 children: [],
                 type: "column",
-                config: {},
+                config: {
+                    activeTabIndex: undefined,
+                    allowDrop: undefined,
+                    isPinned: undefined,
+                    widthInPx: undefined,
+                    heightInPx: undefined,
+                    frameId: undefined,
+                    height: undefined,
+                    workspaceId: undefined,
+                    width: undefined,
+                    positionIndex: undefined,
+                    minWidth: undefined,
+                    maxWidth: undefined,
+                    minHeight: undefined,
+                    maxHeight: undefined
+                },
                 id: undefined,
             }],
             id: undefined,
@@ -499,7 +737,26 @@ describe("convertToAPIConfig() Should", () => {
                 children: [],
                 type: "group",
                 id: undefined,
-                config: {},
+                config: {
+                    activeTabIndex: undefined,
+                    frameId: undefined,
+                    height: undefined,
+                    workspaceId: undefined,
+                    width: undefined,
+                    positionIndex: undefined,
+                    allowDrop: undefined,
+                    isPinned: undefined,
+                    widthInPx: undefined,
+                    heightInPx: undefined,
+                    allowExtract: undefined,
+                    showAddWindowButton: undefined,
+                    showEjectButton: undefined,
+                    showMaximizeButton: undefined,
+                    minWidth: undefined,
+                    maxWidth: undefined,
+                    minHeight: undefined,
+                    maxHeight: undefined
+                },
             }],
             id: undefined,
             config: {},
@@ -538,16 +795,65 @@ describe("convertToAPIConfig() Should", () => {
             children: [{
                 type: "row",
                 id: undefined,
-                config: {},
+                config: {
+                    activeTabIndex: undefined,
+                    frameId: undefined,
+                    height: undefined,
+                    workspaceId: undefined,
+                    width: undefined,
+                    positionIndex: undefined,
+                    allowDrop: undefined,
+                    isPinned: undefined,
+                    widthInPx: undefined,
+                    heightInPx: undefined,
+                    minWidth: undefined,
+                    maxWidth: undefined,
+                    minHeight: undefined,
+                    maxHeight: undefined
+                },
                 children: [
                     {
                         type: "column",
                         id: undefined,
-                        config: {},
+                        config: {
+                            activeTabIndex: undefined,
+                            frameId: undefined,
+                            height: undefined,
+                            workspaceId: undefined,
+                            width: undefined,
+                            positionIndex: undefined,
+                            allowDrop: undefined,
+                            isPinned: undefined,
+                            widthInPx: undefined,
+                            heightInPx: undefined,
+                            minWidth: undefined,
+                            maxWidth: undefined,
+                            minHeight: undefined,
+                            maxHeight: undefined
+                        },
                         children: [{
                             type: "group",
                             id: undefined,
-                            config: {},
+                            config: {
+                                activeTabIndex: undefined,
+                                frameId: undefined,
+                                height: undefined,
+                                workspaceId: undefined,
+                                width: undefined,
+                                positionIndex: undefined,
+                                allowDrop: undefined,
+                                isPinned: undefined,
+                                widthInPx: undefined,
+                                heightInPx: undefined,
+                                allowExtract: undefined,
+                                showAddWindowButton: undefined,
+                                showEjectButton: undefined,
+                                showMaximizeButton: undefined,
+                                minWidth: undefined,
+                                maxWidth: undefined,
+                                minHeight: undefined,
+                                maxHeight: undefined
+                            },
                             children: [
                                 mockAppConfig
                             ]
@@ -556,15 +862,64 @@ describe("convertToAPIConfig() Should", () => {
                     {
                         type: "column",
                         id: undefined,
-                        config: {},
+                        config: {
+                            activeTabIndex: undefined,
+                            frameId: undefined,
+                            height: undefined,
+                            workspaceId: undefined,
+                            width: undefined,
+                            positionIndex: undefined,
+                            allowDrop: undefined,
+                            isPinned: undefined,
+                            widthInPx: undefined,
+                            heightInPx: undefined,
+                            minWidth: undefined,
+                            maxWidth: undefined,
+                            minHeight: undefined,
+                            maxHeight: undefined
+                        },
                         children: [{
                             type: "row",
                             id: undefined,
-                            config: {},
+                            config: {
+                                activeTabIndex: undefined,
+                                frameId: undefined,
+                                height: undefined,
+                                workspaceId: undefined,
+                                width: undefined,
+                                positionIndex: undefined,
+                                allowDrop: undefined,
+                                isPinned: undefined,
+                                widthInPx: undefined,
+                                heightInPx: undefined,
+                                minWidth: undefined,
+                                maxWidth: undefined,
+                                minHeight: undefined,
+                                maxHeight: undefined
+                            },
                             children: [{
                                 type: "group",
                                 id: undefined,
-                                config: {},
+                                config: {
+                                    activeTabIndex: undefined,
+                                    frameId: undefined,
+                                    height: undefined,
+                                    workspaceId: undefined,
+                                    width: undefined,
+                                    positionIndex: undefined,
+                                    allowDrop: undefined,
+                                    isPinned: undefined,
+                                    widthInPx: undefined,
+                                    heightInPx: undefined,
+                                    allowExtract: undefined,
+                                    showAddWindowButton: undefined,
+                                    showEjectButton: undefined,
+                                    showMaximizeButton: undefined,
+                                    minWidth: undefined,
+                                    maxWidth: undefined,
+                                    minHeight: undefined,
+                                    maxHeight: undefined
+                                },
                                 children: [
                                     mockAppConfig
                                 ]

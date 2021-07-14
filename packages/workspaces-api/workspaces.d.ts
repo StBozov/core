@@ -8,11 +8,15 @@ export default WorkspacesFactory;
  * @docmenuorder 1
  * @docName Workspaces
  * @intro
- * The **Workspaces API** enables advanced window management functionalities. Using Workspaces, users are able to arrange multiple applications within the same visual window (called **Frame**). This arrangement can be performed programmatically or by dragging and dropping applications within the Frame. Users can also save Workspace layouts and restore them within the same Frame or even in different Frames.
+ * The Workspaces API offers advanced window management functionalities. Using Workspaces, users are able to arrange multiple applications 
+ * within the same visual window (called *Frame*). This arrangement can be performed programmatically or by dragging and dropping applications within the Frame. 
+ * Users can also save Workspace Layouts and restore them within the same Frame or even in different Frames.
  *
- * The Glue42 Workspaces enable the users to compose a custom arrangement of applications by treating each application as an individual building block that can be added, removed, moved or resized within the unifying Frame. The Frame can hold multiple Workspaces (as tabs) and can also be maximized, minimized or resized. 
- *
- * See also the [Glue42 Enterprise: Workspaces](https://docs.glue42.com/glue42-concepts/windows/workspaces/javascript/index.html) and [Glue42 Core: Workspaces](https://docs.glue42.com/core/capabilities/workspaces/index.html) documentation for more details.
+ * The Glue42 Workspaces enable the users to compose a custom arrangement of applications by treating each application 
+ * as an individual building block that can be added, removed, moved or resized within a Workspace. 
+ * The Frame can hold multiple Workspaces (as tabs) and can also be maximized, minimized or resized.
+ * 
+ * The Workspaces API is accessible through the `glue.workspaces` object.
  */
 export namespace Glue42Workspaces {
 
@@ -94,6 +98,8 @@ export namespace Glue42Workspaces {
             appName: string;
             /** The url of the window, in case it is not a defined as an application. */
             url?: string;
+            /** The title of the window */
+            title?: string;
         };
     }
 
@@ -113,12 +119,24 @@ export namespace Glue42Workspaces {
 
         /** A setting used to declare that the workspace must be in a new frame and also provide options for that new frame */
         newFrame?: NewFrameConfig | boolean;
+
+        loadingStrategy?: LoadingStrategy;
+        /** Used for replacing the specified workspace instead of creating a new one */
+        reuseWorkspaceId?: string;
+    }
+
+    /** An object containing the bounds of a frame */
+    export interface FrameBounds {
+        top?: number;
+        left?: number;
+        width?: number;
+        height?: number;
     }
 
     /** An object describing the possible settings when defining a new frame. */
     export interface NewFrameConfig {
         /** An object describing the possible settings when defining a new frame. */
-        bounds?: { top?: number; left?: number; width?: number; height?: number };
+        bounds?: FrameBounds;
     }
 
     /** An object defining the resize parameters of a frame. */
@@ -151,8 +169,8 @@ export namespace Glue42Workspaces {
         saveLayout?: boolean;
     }
 
-    /** The restore strategy used to open new workspaces from existing layouts. */
-    export type RestoreType = "direct" | "delayed" | "lazy";
+    /** The loading strategy used to open new workspaces */
+    export type LoadingStrategy = "direct" | "delayed" | "lazy";
 
     /** An object which represent a workspace element. This is an element can be a box or a workspace window. */
     export type WorkspaceElement = WorkspaceBox | WorkspaceWindow;
@@ -185,6 +203,11 @@ export namespace Glue42Workspaces {
 
         /** Provides the opportunity to open a workspace with no tab header */
         noTabHeader?: boolean;
+
+        /** Used for replacing the specified workspace instead of creating a new one */
+        reuseWorkspaceId?: string;
+
+        loadStrategy?: LoadingStrategy;
     }
 
     /** An object describing the possible options when defining a new workspace */
@@ -215,6 +238,8 @@ export namespace Glue42Workspaces {
 
         /** An array of all the box's children which will also be opened. */
         children?: Array<WorkspaceWindowDefinition | BoxDefinition>;
+
+        config?: any;
     }
 
     /** An object describing the possible options when opening a window inside a workspace. */
@@ -261,6 +286,9 @@ export namespace Glue42Workspaces {
         /** An unique string identifier of the window */
         id: string | undefined;
 
+        /** An unique string identifier of the workspace element that hosts the window */
+        elementId: string;
+
         /** The type of the workspace element */
         type: "window";
 
@@ -297,6 +325,11 @@ export namespace Glue42Workspaces {
 
     /** An object describing a frame */
     export interface Frame extends FrameSummary {
+        /**
+         * Retrieves the current bounds of the frame.
+         */
+        getBounds(): Promise<FrameBounds>;
+
         /**
          * Changes the size of this frame.
          * @param config An object defining the resize parameters.
@@ -916,7 +949,7 @@ export namespace Glue42Workspaces {
          * Saves the provided layouts into Glue42. In Glue42 Core this will fail with an error if a provided layout's name matches a read-only layout.
          * @param layouts A collection of layouts to add to Glue42.
          */
-        import(layouts: WorkspaceLayout[]): Promise<void>;
+        import(layouts: WorkspaceLayout[], mode?: "replace" | "merge"): Promise<void>;
 
         /**
          * Saves an existing, open workspace as a layout.

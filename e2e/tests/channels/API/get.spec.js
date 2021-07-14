@@ -12,7 +12,7 @@ describe('get()', () => {
             await glue.channels.get(1);
             throw new Error('get() should have thrown an error because name wasn\'t of type string!');
         } catch (error) {
-            expect(error.message).to.equal('Please provide the channel name as a string!');
+            expect(error.message).to.equal('expected a string, got a number');
         }
     });
 
@@ -23,12 +23,12 @@ describe('get()', () => {
             await glue.channels.get(nonExistentChannelName);
             throw new Error('get() should have thrown an error because there wasn\'t a channel with the provided name!');
         } catch (error) {
-            expect(error.message).to.equal(`A channel with name: ${nonExistentChannelName} doesn't exist!`);
+            expect(error.message).to.equal("Expected a valid channel name");
         }
     });
 
     it('Should return the context (name, meta and data) of the provided channel.', async () => {
-        const [channel] = (await gtf.getGlueConfigJson()).channels;
+        const channel = gtf.getChannelsConfigDefinitions()[0];
         const channelName = channel.name;
 
         // Join the channel.

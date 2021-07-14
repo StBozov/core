@@ -1,0 +1,54 @@
+{
+    "name": "@glue42/web-worker",
+    "version": "1.0.0",
+    "main": "dist/web.worker.umd.js",
+    "module": "dist/web.worker.es.js",
+    "types": "./web.worker.d.ts",
+    "scripts": {
+        "build": "rollup -c",
+        "test": "echo \"Error: no test specified\"",
+        "audit": "node ../../scripts/audit/index.js",
+        "preversion": "npm run build && npm run test && npm run audit",
+        "version": "npm run build"
+    },
+    "keywords": [
+        "glue",
+        "glue42",
+        "desktop",
+        "web",
+        "service worker"
+    ],
+    "description": "Glue42 Core service worker module",
+    "author": {
+        "name": "Glue42",
+        "url": "https://docs.glue42.com/"
+    },
+    "license": "MIT",
+    "publishConfig": {
+        "access": "public"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/Glue42/core.git"
+    },
+    "homepage": "https://docs.glue42.com/",
+    "files": [
+        "dist"
+    ],
+    "devDependencies": {
+        "@rollup/plugin-commonjs": "^19.0.0",
+        "@rollup/plugin-json": "^4.1.0",
+        "@rollup/plugin-node-resolve": "^13.0.0",
+        "@types/node": "^15.6.1",
+        "@types/shortid": "0.0.29",
+        "rollup": "^2.50.1",
+        "rollup-plugin-terser": "^7.0.2",
+        "rollup-plugin-typescript2": "^0.30.0",
+        "tslint": "^6.1.3",
+        "typescript": "^4.3.2"
+    },
+    "dependencies": {
+        "decoder-validate": "0.0.2",
+        "shortid": "^2.2.16"
+    }
+}
