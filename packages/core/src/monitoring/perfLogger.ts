@@ -13,7 +13,7 @@ export class PerfLogger implements Logger {
         const event = this.createPerfEvent(msg.domain, msg.ipc);
         event.status = msg.status ?? event.status;
         event.metadata = msg.metadata;
-        event.size = JSON.stringify(msg.args)?.length ?? 0;
+        event.paramsSize = JSON.stringify(msg.args)?.length ?? 0;
         this.collection.addEvent(event);
     }
 
@@ -29,14 +29,16 @@ export class PerfLogger implements Logger {
         const event = this.createPerfEvent(msg.domain, msg.ipc);
         const start = window.performance.now();
         event.metadata = JSON.stringify(msg.metadata);
-        event.size = JSON.stringify(msg.args)?.length ?? 0;
+        event.params = msg.args;
+        event.paramsSize = JSON.stringify(msg.args)?.length ?? 0;
         this.collection.addEvent(event);
         return {
             success: (result: any) => {
                 const end = window.performance.now();
                 const copy = { ...event };
                 copy.status = PerfStatus.Completed;
-                copy.size = (copy.size ?? 0) + (JSON.stringify(result)?.length ?? 0);
+                copy.result = result;
+                copy.resultSize = JSON.stringify(result)?.length ?? 0;
                 copy.elapsed = end - start;
                 this.collection.changeEvent(copy.id, copy);
             },

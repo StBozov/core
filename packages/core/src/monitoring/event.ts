@@ -6,7 +6,10 @@ export interface PerfEvent {
     ipc: boolean;
     metadata?: string;
     error?: string;
-    size?: number;
+    params?: any;
+    paramsSize?: number;
+    result?: any;
+    resultSize?: number;
     elapsed?: number;
 }
 
