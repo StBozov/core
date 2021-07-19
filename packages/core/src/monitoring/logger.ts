@@ -9,6 +9,7 @@ export interface LogMessage {
     domain: PerfDomain;
     status?: PerfStatus;
     metadata: any;
+    error?: Error;
     ipc?: boolean;
     args?: any;
 }

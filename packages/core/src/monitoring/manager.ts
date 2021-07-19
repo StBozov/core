@@ -1,3 +1,4 @@
+import Interop from "../interop/interop";
 import { PerfClient } from "./client";
 import { PerfCollection } from "./collection";
 import { DefaultPerfClient } from "./defaultClient";
@@ -10,10 +11,14 @@ export class PerfManager {
     private _collection: PerfCollection;
     private _clients: PerfClient[] = [];
 
-    constructor() {
+    constructor(public interop: () => Interop) {
         this._collection = new UnboundedPerfCollection();
         this._logger = new PerfLogger(this._collection);
         this.createDefaultClient();
+    }
+
+    public getAll(): Promise<any> {
+        return this.interop().invoke("Tick42.Monitoring.GetEvents", {}, "all");
     }
 
     public get version(): string {

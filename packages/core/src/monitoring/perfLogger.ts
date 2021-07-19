@@ -10,10 +10,9 @@ export class PerfLogger implements Logger {
     }
 
     public log(msg: LogMessage): void {
-        const event = this.createPerfEvent(msg.domain, msg.ipc);
-        event.status = msg.status ?? event.status;
-        event.metadata = msg.metadata;
-        event.paramsSize = JSON.stringify(msg.args)?.length ?? 0;
+        const event = this.createPerfEvent(msg);
+        event.error = msg.error?.message;
+        event.status = event.error ? PerfStatus.Failed : PerfStatus.Completed;
         this.collection.addEvent(event);
     }
 
@@ -26,11 +25,8 @@ export class PerfLogger implements Logger {
             };
         }
 
-        const event = this.createPerfEvent(msg.domain, msg.ipc);
+        const event = this.createPerfEvent(msg);
         const start = window.performance.now();
-        event.metadata = JSON.stringify(msg.metadata);
-        event.params = msg.args;
-        event.paramsSize = JSON.stringify(msg.args)?.length ?? 0;
         this.collection.addEvent(event);
         return {
             success: (result: any) => {
@@ -53,13 +49,16 @@ export class PerfLogger implements Logger {
         };
     }
 
-    private createPerfEvent(domain: PerfDomain, ipc?: boolean): PerfEvent {
+    private createPerfEvent(msg: LogMessage): PerfEvent {
         return {
             id: this.getNextId(),
             date: new Date(),
             status: PerfStatus.Pending,
-            domain,
-            ipc: ipc ?? true
+            domain: msg.domain,
+            ipc: msg.ipc ?? true,
+            metadata: JSON.stringify(msg.metadata),
+            params: msg.args,
+            paramsSize: JSON.stringify(msg.args)?.length ?? 0
         };
     }
 

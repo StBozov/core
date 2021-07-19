@@ -7,7 +7,7 @@ import ServerRepository from "./server/repository";
 import { UnsubscribeFunction } from "callback-registry";
 import gW3ProtocolFactory from "./protocols/gw3/factory";
 import { InstanceWrapper } from "./instance";
-import { Logger as PerfLogger } from "../monitoring/logger";
+import { Logger as PerfLogger, LogMessage } from "../monitoring/logger";
 import { PerfDomain } from "../monitoring/event";
 import { PromiseWrapper } from "../utils/pw";
 
@@ -62,6 +62,14 @@ export default class Interop implements Glue42Core.AGM.API {
             this.server = new Server(this.protocol, this.serverRepository);
             return this;
         });
+
+        const metadata = {
+            methodName: "interop constructor",
+            configuration: { waitTimeoutMs: configuration.waitTimeoutMs, methodResponseTimeout: configuration.methodResponseTimeout }
+        };
+        const end = this.perfLogger.start({ domain: PerfDomain.Interop, metadata, ipc: true });
+
+        this.readyPromise.then(() => end.success()).catch((err) => end.error(err));
     }
 
     public ready() {
@@ -109,19 +117,48 @@ export default class Interop implements Glue42Core.AGM.API {
         const end = this.perfLogger.start({ domain: PerfDomain.Interop, metadata, ipc: true });
 
         const result = this.client.subscribe(method, options, successCallback, errorCallback);
+        // TODO: log push to the stream as well
 
         result.then(() => end.success()).catch(end.error);
         return result;
     }
 
-    public createStream(streamDef: string | Glue42Core.AGM.MethodDefinition, callbacks: Glue42Core.AGM.StreamOptions, successCallback?: (args?: object) => void, errorCallback?: (error?: string | object) => void): Promise<Glue42Core.AGM.Stream> {
+    public async createStream(streamDef: string | Glue42Core.AGM.MethodDefinition, callbacks: Glue42Core.AGM.StreamOptions, successCallback?: (args?: object) => void, errorCallback?: (error?: string | object) => void): Promise<Glue42Core.AGM.Stream> {
         const metadata = { methodName: "createStream", streamDef };
         const end = this.perfLogger.start({ domain: PerfDomain.Interop, metadata, ipc: true });
 
-        const result = this.server.createStream(streamDef, callbacks, successCallback, errorCallback);
-
-        result.then(() => end.success()).catch(end.error);
-        return result;
+        let result: Glue42Core.AGM.Stream;
+        try {
+            result = await this.server.createStream(streamDef, callbacks, successCallback, errorCallback);
+            end.success();
+        } catch (err) {
+            end.error(err);
+            throw err;
+        }
+        return Object.assign({}, result, {
+            push: (data: object, branches?: string | string[]) => {
+                const event: LogMessage = { domain: PerfDomain.Interop, metadata: { methodName: "push", streamDef }, ipc: true, args: data };
+                try {
+                    result.push(data, branches);
+                    this.perfLogger.log(event);
+                } catch (err) {
+                    event.error = err;
+                    this.perfLogger.log(event);
+                    throw err;
+                }
+            },
+            close: () => {
+                const event: LogMessage = { domain: PerfDomain.Interop, metadata: { methodName: "close", streamDef }, ipc: true };
+                try {
+                    result.close();
+                    this.perfLogger.log(event);
+                } catch (err) {
+                    event.error = err;
+                    this.perfLogger.log(event);
+                    throw err;
+                }
+            }
+        });
     }
 
     public unregister(methodFilter: string | Glue42Core.AGM.MethodDefinition): Promise<void> {
@@ -160,7 +197,7 @@ export default class Interop implements Glue42Core.AGM.API {
 
         const result = this.client.invoke(methodFilter, argumentObj, target, additionalOptions, success, error);
 
-        result.then((obj) => end.success(obj?.all_return_values)).catch(end.error);
+        result.then((obj) => end.success(obj)).catch(end.error);
         return result;
     }
 

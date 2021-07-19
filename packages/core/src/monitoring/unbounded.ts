@@ -2,15 +2,17 @@ import { PerfCollection } from "./collection";
 import { PerfEvent } from "./event";
 
 export class UnboundedPerfCollection implements PerfCollection {
-    private _collection: { [id: string]: PerfEvent; } = {};
-
-    constructor(collection?: PerfCollection) {
-        collection?.getEvents().forEach((e) => this._collection[e.id] = e);
-    }
 
     public get capacity(): number {
         // calculate memory not length
         throw new Error("Method not implemented.");
+    }
+
+    public droppedMessages = 0;
+    private _collection: { [id: string]: PerfEvent; } = {};
+
+    constructor(collection?: PerfCollection) {
+        collection?.getEvents().forEach((e) => this._collection[e.id] = e);
     }
 
     public changeCapacity(size: number): void {

@@ -187,7 +187,7 @@ const GlueCore = (userConfig?: Glue42Core.Config, ext?: Glue42Core.Extension): P
 
     function setupMonitoring(): Promise<PerfManager> {
         const initTimer = timer("monitoring");
-        _perfManager = new PerfManager();
+        _perfManager = new PerfManager(() => _interop);
         _perfInteropFacade = new PerfAgmFacade(_perfManager);
         registerLib("monitoring", _perfManager, initTimer);
         return Promise.resolve(_perfManager);

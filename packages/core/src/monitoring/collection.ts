@@ -2,6 +2,7 @@ import { PerfEvent } from "./event";
 
 export interface PerfCollection {
     capacity: number;
+    droppedMessages: number;
     changeCapacity(size: number): void;
 
     getEvent(id: number): PerfEvent;
