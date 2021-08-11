@@ -44,7 +44,7 @@ export interface ServerProtocolDefinition {
 }
 
 export interface ClientProtocolDefinition {
-    invoke(invocationId: string, method: ClientMethodInfo, argumentsObj: object | undefined, target: ServerInfo, stuff: Glue42Core.AGM.InvokeOptions): Promise<InvokeResultMessage>;
+    invoke(invocationId: string, method: ClientMethodInfo, argumentsObj: object | undefined, target: ServerInfo, stuff: Glue42Core.AGM.InvokeOptions, skipPerfLogging?: boolean): Promise<InvokeResultMessage>;
     subscribe(stream: Glue42Core.AGM.MethodDefinition, args: Glue42Core.AGM.SubscriptionParams, targetServers: ServerMethodsPair[], successProxy: (sub: Glue42Core.AGM.Subscription) => void, errorProxy: (err: SubscribeError) => void, existingSub?: SubscriptionInner): void;
     drainSubscriptions(): SubscriptionInner[];
 }

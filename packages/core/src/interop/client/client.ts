@@ -259,7 +259,7 @@ export default class Client {
      * console.log('37 + 5 = ' + result.returned.answer);
      */
 
-    public async invoke(methodFilter: string | Glue42Core.AGM.MethodDefinition, argumentObj?: object, target?: Glue42Core.AGM.InstanceTarget, additionalOptions?: Glue42Core.AGM.InvokeOptions, success?: Glue42Core.AGM.InvokeSuccessHandler<any>, error?: Glue42Core.AGM.InvokeErrorHandler)
+    public async invoke(methodFilter: string | Glue42Core.AGM.MethodDefinition, argumentObj?: object, target?: Glue42Core.AGM.InstanceTarget, additionalOptions?: Glue42Core.AGM.InvokeOptions, skipPerfLogging?: boolean, success?: Glue42Core.AGM.InvokeSuccessHandler<any>, error?: Glue42Core.AGM.InvokeErrorHandler)
         : Promise<Glue42Core.AGM.InvocationResult<any>> {
         const getInvokePromise = async () => {
 
@@ -349,7 +349,7 @@ export default class Client {
                     const invId = random();
                     const method = serversMethodPair.methods[0];
                     const server = serversMethodPair.server;
-                    const invokePromise = this.protocol.client.invoke(invId, method, argumentObj, server, additionalOptionsCopy);
+                    const invokePromise = this.protocol.client.invoke(invId, method, argumentObj, server, additionalOptionsCopy, skipPerfLogging);
 
                     return Promise.race([
                         invokePromise,

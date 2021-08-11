@@ -6,8 +6,9 @@ export class PerfAgmFacade {
     }
 
     public registerMethods(interop: Glue42Core.AGM.API): void {
-        interop.register("Tick42.Monitoring.GetEvents", () => {
-            return this.perfManager.defaultClient.getEvents();
+        interop.registerAsync("Tick42.Monitoring.GetEvents", async (args, caller, success, error) => {
+            const result = { events: await this.perfManager.defaultClient.getEvents(), skipPerfLogging: true };
+            success(result);
         });
     }
 }

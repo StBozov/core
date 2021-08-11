@@ -1,10 +1,12 @@
 import { Glue42Core } from "../../glue";
 import { Logger } from "../logger/logger";
 import Connection from "../connection/connection";
+import { Logger as PerfLogger } from "../monitoring/Logger";
 
 export interface MetricsSettings {
     connection?: Connection;
     logger: Logger;
+    perfLogger: PerfLogger;
     /** If true will auto create click stream metrics in root system */
     clickStream?: boolean;
     settings?: object;

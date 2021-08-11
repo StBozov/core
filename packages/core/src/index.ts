@@ -87,7 +87,7 @@ const GlueCore = (userConfig?: Glue42Core.Config, ext?: Glue42Core.Extension): P
 
     function setupConnection(): Promise<object> {
         const initTimer = timer("connection");
-        _connection = new Connection(internalConfig.connection, _logger.subLogger("connection"));
+        _connection = new Connection(internalConfig.connection, _logger.subLogger("connection"), _perfManager.logger);
 
         let authPromise: Promise<any> = Promise.resolve(internalConfig.auth);
 
@@ -163,7 +163,8 @@ const GlueCore = (userConfig?: Glue42Core.Config, ext?: Glue42Core.Extension): P
             service: identity?.service ?? glue42gd?.applicationName ?? internalConfig.application,
             instance: identity?.instance ?? identity?.windowId ?? shortid(),
             disableAutoAppSystem,
-            pagePerformanceMetrics: typeof config !== "boolean" ? config?.pagePerformanceMetrics : undefined
+            pagePerformanceMetrics: typeof config !== "boolean" ? config?.pagePerformanceMetrics : undefined,
+            perfLogger: _perfManager.logger
         });
 
         registerLib("metrics", _metrics, initTimer);
@@ -377,8 +378,8 @@ const GlueCore = (userConfig?: Glue42Core.Config, ext?: Glue42Core.Extension): P
 
     return preloadPromise
         .then(setupLogger)
-        .then(setupConnection)
         .then(setupMonitoring)
+        .then(setupConnection)
         .then(() => Promise.all([setupMetrics(), setupInterop(), setupContexts(), setupBus()]))
         .then(() => _interop.readyPromise)
         .then(() => _perfInteropFacade.registerMethods(_interop))

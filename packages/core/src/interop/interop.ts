@@ -81,35 +81,107 @@ export default class Interop implements Glue42Core.AGM.API {
     }
 
     public serverAdded(callback: (instance: Glue42Core.AGM.Instance) => void): UnsubscribeFunction {
-        return this.client.serverAdded(callback);
+        const event: LogMessage = { domain: PerfDomain.Interop, metadata: { methodName: "serverAdded" }, ipc: false };
+        try {
+            const result = this.client.serverAdded(callback);
+            this.perfLogger.log(event);
+            return result;
+        } catch (err) {
+            event.error = err;
+            this.perfLogger.log(event);
+            throw err;
+        }
     }
 
     public serverMethodRemoved(callback: (info: { server: Glue42Core.AGM.Instance; method: Glue42Core.AGM.Method; }) => void): UnsubscribeFunction {
-        return this.client.serverMethodRemoved(callback);
+        const event: LogMessage = { domain: PerfDomain.Interop, metadata: { methodName: "serverMethodRemoved" }, ipc: false };
+        try {
+            const result = this.client.serverMethodRemoved(callback);
+            this.perfLogger.log(event);
+            return result;
+        } catch (err) {
+            event.error = err;
+            this.perfLogger.log(event);
+            throw err;
+        }
     }
 
     public serverMethodAdded(callback: (info: { server: Glue42Core.AGM.Instance; method: Glue42Core.AGM.Method; }) => void): UnsubscribeFunction {
-        return this.client.serverMethodAdded(callback);
+        const event: LogMessage = { domain: PerfDomain.Interop, metadata: { methodName: "serverMethodAdded" }, ipc: false };
+        try {
+            const result = this.client.serverMethodAdded(callback);
+            this.perfLogger.log(event);
+            return result;
+        } catch (err) {
+            event.error = err;
+            this.perfLogger.log(event);
+            throw err;
+        }
     }
 
     public methodRemoved(callback: (def: Glue42Core.AGM.Method) => void): UnsubscribeFunction {
-        return this.client.methodRemoved(callback);
+        const event: LogMessage = { domain: PerfDomain.Interop, metadata: { methodName: "methodRemoved" }, ipc: false };
+        try {
+            const result = this.client.methodRemoved(callback);
+            this.perfLogger.log(event);
+            return result;
+        } catch (err) {
+            event.error = err;
+            this.perfLogger.log(event);
+            throw err;
+        }
     }
 
     public methodAdded(callback: (def: Glue42Core.AGM.Method) => void): UnsubscribeFunction {
-        return this.client.methodAdded(callback);
+        const event: LogMessage = { domain: PerfDomain.Interop, metadata: { methodName: "methodAdded" }, ipc: false };
+        try {
+            const result = this.client.methodAdded(callback);
+            this.perfLogger.log(event);
+            return result;
+        } catch (err) {
+            event.error = err;
+            this.perfLogger.log(event);
+            throw err;
+        }
     }
 
     public methodsForInstance(instance: Glue42Core.AGM.Instance): Glue42Core.Interop.Method[] {
-        return this.client.methodsForInstance(instance);
+        const event: LogMessage = { domain: PerfDomain.Interop, metadata: { methodName: "methodsForInstance" }, ipc: false, args: instance };
+        try {
+            const result = this.client.methodsForInstance(instance);
+            this.perfLogger.log(event);
+            return result;
+        } catch (err) {
+            event.error = err;
+            this.perfLogger.log(event);
+            throw err;
+        }
     }
 
     public methods(methodFilter: Glue42Core.AGM.MethodDefinition): Glue42Core.Interop.Method[] {
-        return this.client.methods(methodFilter);
+        const event: LogMessage = { domain: PerfDomain.Interop, metadata: { methodName: "methods" }, ipc: false, args: methodFilter };
+        try {
+            const result = this.client.methods(methodFilter);
+            this.perfLogger.log(event);
+            return result;
+        } catch (err) {
+            event.error = err;
+            this.perfLogger.log(event);
+            throw err;
+        }
     }
 
     public servers(methodFilter: Glue42Core.AGM.MethodDefinition): Glue42Core.AGM.Instance[] {
-        return this.client.servers(methodFilter);
+        const event: LogMessage = { domain: PerfDomain.Interop, metadata: { methodName: "servers" }, ipc: false, args: methodFilter };
+        try {
+            const result = this.client.servers(methodFilter);
+            this.perfLogger.log(event);
+            return result;
+        } catch (err) {
+            event.error = err;
+            this.perfLogger.log(event);
+            throw err;
+        }
     }
 
     public subscribe(method: string, options: Glue42Core.AGM.SubscriptionParams, successCallback?: (subscription: Glue42Core.AGM.Subscription) => void, errorCallback?: (err: SubscribeError) => void): Promise<Glue42Core.AGM.Subscription> {
@@ -135,6 +207,8 @@ export default class Interop implements Glue42Core.AGM.API {
             end.error(err);
             throw err;
         }
+
+        // create push and close wrapper functions, so that we can log info when someone invokes them
         return Object.assign({}, result, {
             push: (data: object, branches?: string | string[]) => {
                 const event: LogMessage = { domain: PerfDomain.Interop, metadata: { methodName: "push", streamDef }, ipc: true, args: data };
@@ -195,7 +269,12 @@ export default class Interop implements Glue42Core.AGM.API {
         const metadata = { methodName: "invoke", methodFilter, target, additionalOptions };
         const end = this.perfLogger.start({ domain: PerfDomain.Interop, metadata, ipc: true, args: argumentObj });
 
-        const result = this.client.invoke(methodFilter, argumentObj, target, additionalOptions, success, error);
+        let skipPerfLogging = false;
+        if (methodFilter === "Tick42.Monitoring.GetEvents") {
+            skipPerfLogging = true;
+        }
+
+        const result = this.client.invoke(methodFilter, argumentObj, target, additionalOptions, skipPerfLogging, success, error);
 
         result.then((obj) => end.success(obj)).catch(end.error);
         return result;

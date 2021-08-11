@@ -36,7 +36,7 @@ export default class ClientProtocol implements ClientProtocolDefinition {
         this.streaming.subscribe(stream, options, targetServers, success, error, existingSub);
     }
 
-    public invoke(id: string, method: ClientMethodInfo, args: object, target: ServerInfo): Promise<InvokeResultMessage> {
+    public invoke(id: string, method: ClientMethodInfo, args: object, target: ServerInfo, stuff: Glue42Core.AGM.InvokeOptions,  skipPerfLogging?: boolean): Promise<InvokeResultMessage> {
 
         const serverId = target.id;
         const methodId = method.gatewayId;
@@ -48,7 +48,7 @@ export default class ClientProtocol implements ClientProtocolDefinition {
         };
 
         // we transfer the invocation id as tag
-        return this.session.send<ResultMessage>(msg, { invocationId: id, serverId })
+        return this.session.send<ResultMessage>(msg, { invocationId: id, serverId }, { skipPerfLogging })
             .then((m: ResultMessage) => this.handleResultMessage(m))
             .catch((err) => this.handleInvocationError(err));
     }

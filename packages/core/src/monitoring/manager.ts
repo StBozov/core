@@ -2,7 +2,8 @@ import Interop from "../interop/interop";
 import { PerfClient } from "./client";
 import { PerfCollection } from "./collection";
 import { DefaultPerfClient } from "./defaultClient";
-import { Logger } from "./logger";
+import { PerfEvent } from "./event";
+import { Logger, LogMessage } from "./logger";
 import { PerfLogger } from "./perfLogger";
 import { UnboundedPerfCollection } from "./unbounded";
 
@@ -17,12 +18,30 @@ export class PerfManager {
         this.createDefaultClient();
     }
 
-    public getAll(): Promise<any> {
-        return this.interop().invoke("Tick42.Monitoring.GetEvents", {}, "all");
+    public async getAll(): Promise<any> {
+        const ir = await this.interop().invoke("Tick42.Monitoring.GetEvents", {}, "all");
+        const results: any[] = [];
+        ir.all_return_values?.forEach((item) => {
+            const instance = item.executed_by?.instance;
+            const application = item.executed_by?.applicationName ?? item.executed_by?.application;
+            (item.returned.events as [])?.forEach((i) => {
+                results.push(Object.assign({}, i, { instance, application }));
+            });
+        });
+        return results;
     }
 
     public get version(): string {
         throw new Error("Method not implemented.");
+    }
+
+    public static get nullLogger(): Logger {
+        return {
+            log: (msg: LogMessage) => { /*do nothing*/ },
+            start: (msg: LogMessage) => {
+                return { success: (result: any) => { /*do nothing*/ }, error: (err: Error) => { /*do nothing*/ } };
+            }
+        };
     }
 
     public get logger(): Logger {

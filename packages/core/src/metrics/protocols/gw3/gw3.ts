@@ -2,6 +2,8 @@ import { Glue42Core } from "../../../../glue";
 import { Protocol, MetricsSettings } from "../../types";
 import { composeMsgForRootStateMetric, getMetricValueByType, normalizeMetricName, serializeMetric } from "./serializer";
 import Connection from "../../../connection/connection";
+import { LogMessage } from "../../../monitoring/Logger";
+import { PerfDomain, PerfStatus } from "../../../monitoring/event";
 
 export default function (connection: Connection, config: MetricsSettings): Protocol {
     if (!connection || typeof connection !== "object") {
@@ -15,6 +17,13 @@ export default function (connection: Connection, config: MetricsSettings): Proto
         let resolveReadyPromise: (() => void) | undefined;
         joinPromise = new Promise((resolve) => {
             resolveReadyPromise = resolve;
+            const perfMsg: LogMessage = {
+                domain: PerfDomain.Metrics,
+                status: PerfStatus.Completed,
+                metadata: "metrics joined",
+                ipc: true
+            };
+            config.perfLogger?.log(perfMsg);
         });
 
         session = connection.domain("metrics");
@@ -172,7 +181,7 @@ export default function (connection: Connection, config: MetricsSettings): Proto
         updateMetricCore(metricClone);
     };
 
-    const updateMetricCore = (metric: Glue42Core.Metrics.Metric): Promise<void> => {
+    const updateMetricCore = async (metric: Glue42Core.Metrics.Metric): Promise<void> => {
         if (canUpdate()) {
             const value = getMetricValueByType(metric);
             const publishMetricsMsg = {
@@ -183,7 +192,16 @@ export default function (connection: Connection, config: MetricsSettings): Proto
                     timestamp: Date.now(),
                 }],
             };
-            return session.sendFireAndForget(publishMetricsMsg);
+            await session.sendFireAndForget(publishMetricsMsg);
+            const perfMsg: LogMessage = {
+                domain: PerfDomain.Metrics,
+                status: PerfStatus.Completed,
+                metadata: "updateMetric method",
+                ipc: true,
+                args: publishMetricsMsg
+            };
+            config.perfLogger?.log(perfMsg);
+            return;
         }
         return Promise.resolve();
     };

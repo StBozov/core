@@ -1,6 +1,7 @@
 const WebSocketServer = require("ws").Server;
 import WSTransport from "../../src/connection/transports/ws";
 import { Logger } from "../../src/logger/logger";
+import { PerfManager } from "../../src/monitoring/manager";
 
 describe("ws", () => {
 
@@ -16,7 +17,7 @@ describe("ws", () => {
         const settings = { ws: `ws://localhost:${port}` };
 
         const logger = new Logger("ws");
-        const wsClient = new WSTransport(settings, logger);
+        const wsClient = new WSTransport(settings, logger, PerfManager.nullLogger);
 
         wsClient.onConnectedChanged((isConnected: boolean, reason?: string) => {
             // console.log(`onConnectedChanged: ${isConnected}, reason: "${reason}"`);

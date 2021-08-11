@@ -25,7 +25,9 @@ export class UnboundedPerfCollection implements PerfCollection {
 
     // ------------- Implement -------------------------
     public getEvents(): PerfEvent[] {
-        return { ...Object.values(this._collection) };
+        const arr: PerfEvent[] = [];
+        Object.values(this._collection).forEach((kvp) => arr.push(kvp));
+        return arr;
     }
     public addEvent(e: PerfEvent): void {
         this._collection[e.id] = e;
@@ -36,7 +38,8 @@ export class UnboundedPerfCollection implements PerfCollection {
     }
     // -------------------------------------------------
     public removeEvent(e: PerfEvent): boolean {
-        throw new Error("Method not implemented.");
+        delete this._collection[e.id];
+        return true;
     }
     public onEvent(callback: (action: "added" | "changed" | "removed", e: PerfEvent) => void): void {
         throw new Error("Method not implemented.");

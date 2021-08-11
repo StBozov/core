@@ -8,12 +8,15 @@ import { Glue42Core } from "../../../glue";
 import Utils from "../../utils/utils";
 import { PromiseWrapper } from "../../utils/pw";
 import timer from "../../utils/timer";
+import { Logger as PerfLogger, LogMessage } from "../../monitoring/Logger";
+import { PerfDomain, PerfStatus } from "../../monitoring/event";
 
 const WebSocketConstructor = Utils.isNode() ? require("ws") : window.WebSocket;
 
 export default class WS implements Transport {
     private ws: WebSocket | undefined;
     private logger: Logger;
+    private perfLogger: PerfLogger;
     private settings: ConnectionSettings;
     private startupTimer = timer("connection");
 
@@ -26,9 +29,10 @@ export default class WS implements Transport {
     private _registry: CallbackRegistry = CallbackRegistryFactory();
     private wsRequests: Array<{ callback: () => void, failed?: (err?: string) => void }> = [];
 
-    constructor(settings: ConnectionSettings, logger: Logger) {
+    constructor(settings: ConnectionSettings, logger: Logger, perfLogger: PerfLogger) {
         this.settings = settings;
         this.logger = logger;
+        this.perfLogger = perfLogger;
         if (!this.settings.ws) {
             throw new Error("ws is missing");
         }
@@ -44,10 +48,29 @@ export default class WS implements Transport {
             options = options || {};
             this.waitForSocketConnection(
                 () => {
+                    const perfMsg: LogMessage = {
+                        domain: PerfDomain.WS,
+                        status: PerfStatus.Completed,
+                        metadata: "send method",
+                        ipc: true
+                    };
                     try {
-                        this.ws?.send(msg);
+                        if (this.ws) {
+                            this.ws.send(msg);
+                            if (options?.skipPerfLogging === true) {
+                                // skipping...
+                            } else {
+                                perfMsg.args = msg;
+                                this.perfLogger.log(perfMsg);
+                            }
+                        }
                         resolve();
                     } catch (e) {
+                        if (this.ws) {
+                            perfMsg.error = e;
+                            perfMsg.status = PerfStatus.Failed;
+                            this.perfLogger.log(perfMsg);
+                        }
                         reject(e);
                     }
                 },
@@ -197,7 +220,15 @@ export default class WS implements Transport {
             this.notifyStatusChanged(true);
         };
         // Attach handler
-        this.ws.onmessage = (message: { data: object }) => {
+        this.ws.onmessage = (message: { data: string }) => {
+            const perfMsg: LogMessage = {
+                domain: PerfDomain.WS,
+                status: PerfStatus.Completed,
+                metadata: "onMessage method",
+                ipc: true,
+                args: message.data
+            };
+            this.perfLogger.log(perfMsg);
             this._registry.execute("onMessage", message.data);
         };
 

@@ -1118,6 +1118,7 @@ export namespace Glue42Core {
         }
         /** @ignore */
         export interface SendMessageOptions {
+            skipPerfLogging?: boolean;
             skipPeerId?: boolean;
             retryInterval?: number;
             maxRetries?: number;

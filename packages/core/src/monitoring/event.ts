@@ -19,6 +19,7 @@ export enum PerfStatus {
     Failed = "failed"
 }
 export enum PerfDomain {
+    WS = "ws",
     Interop = "interop",
     Metrics = "metrics",
     Contexts = "contexts"

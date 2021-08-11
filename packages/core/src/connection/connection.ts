@@ -18,6 +18,7 @@ import GW3ProtocolImpl from "./protocols/gw3";
 import { MessageReplayerImpl } from "./replayer";
 import timer from "../utils/timer";
 import WebPlatformTransport from "./transports/webPlatform";
+import { Logger as PerfLogger } from "../monitoring/Logger";
 
 /**
  * A template for gateway connections - this is extended from specific protocols and transports.
@@ -48,7 +49,7 @@ export default class Connection implements Glue42Core.Connection.API {
         return this.protocol?.protocolVersion;
     }
 
-    constructor(private settings: ConnectionSettings, private logger: Logger) {
+    constructor(private settings: ConnectionSettings, private logger: Logger, perfLogger: PerfLogger) {
         settings = settings || {};
         settings.reconnectAttempts = settings.reconnectAttempts || 10;
         settings.reconnectInterval = settings.reconnectInterval || 1000;
@@ -60,7 +61,7 @@ export default class Connection implements Glue42Core.Connection.API {
         } else if (settings.webPlatform) {
             this.transport = new WebPlatformTransport(settings.webPlatform, logger.subLogger("web-platform"), settings.identity);
         } else if (settings.ws !== undefined) {
-            this.transport = new WS(settings, logger.subLogger("ws"));
+            this.transport = new WS(settings, logger.subLogger("ws"), perfLogger);
         } else {
             throw new Error("No connection information specified");
         }
